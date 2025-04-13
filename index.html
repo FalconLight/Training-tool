@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training Console</title>
+  <style>
+    /* CSS Variables */
+    :root {
+      --bg-dark-base: #1a001a;
+      --bg-initial-grad-start: #4a5c6a;
+      --bg-initial-grad-end: #2e3a42;
+      --bg-active-grad-pink-hint: #2a1a20;
+      --bg-active-grad-purple-hint: #251a2a;
+      --bg-active-grad-end: #1a0a10;
+      --text-primary: #c2f0ff;
+      --text-pastel-pink: #FFD8E1;
+      --text-pastel-purple: #E0BBE4;
+      --text-dark-contrast: #1a001a;
+      --text-dim: rgba(194, 240, 255, 0.6);
+      --text-dim-hover: rgba(194, 240, 255, 0.9);
+      --glow-pink-strong: rgba(255, 105, 180, 0.7);
+      --glow-pink-medium: rgba(255, 105, 180, 0.5);
+      --glow-pastel-pink-strong: rgba(255, 182, 193, 0.8);
+      --glow-pastel-pink-medium: rgba(255, 182, 193, 0.6);
+      --glow-pastel-pink-soft: rgba(255, 182, 193, 0.3);
+      --glow-pastel-purple-medium: rgba(224, 187, 228, 0.4);
+      --border-light: rgba(255, 255, 255, 0.3);
+      --border-medium: rgba(255, 255, 255, 0.5);
+      --border-dim: rgba(255, 255, 255, 0.2);
+      --border-dim-hover: rgba(255, 255, 255, 0.4);
+      --border-pastel-pink: rgba(255, 182, 193, 0.8);
+      --border-pastel-pink-dim: rgba(255, 182, 193, 0.4);
+      --border-pastel-purple: rgba(224, 187, 228, 0.7);
+      --button-bg: rgba(100, 100, 120, 0.6);
+      --button-bg-hover: rgba(140, 140, 160, 0.8);
+      --button-cat-bg: rgba(100, 100, 120, 0.4);
+      --button-cat-bg-hover: rgba(140, 140, 160, 0.6);
+      --button-cat-selected-bg: var(--text-pastel-pink);
+      --button-extend-bg: rgba(255, 105, 180, 0.5);
+      --button-extend-bg-hover: rgba(255, 105, 180, 0.7);
+      --button-start-bg: #dcb3ff; /* Thistle */
+      --button-start-bg-hover: var(--text-pastel-pink);
+      --popup-bg: rgba(255, 223, 211, 0.5); /* Pastel Pink bg */
+      --popup-border: var(--border-pastel-purple);
+      --popup-text: var(--bg-active-grad-end);
+      --confirm-popup-bg: rgba(40, 20, 30, 0.9);
+      --confirm-input-bg: rgba(255, 255, 255, 0.1);
+      --scanline-bright: rgba(255, 255, 255, 0.06);
+      --scanline-dim: rgba(255, 255, 255, 0.03);
+      --vignette-shadow: inset 0 0 150px 30px rgba(0, 0, 0, 0.7);
+      --box-shadow-button: 0 2px 5px rgba(0,0,0,0.3);
+      --box-shadow-button-start: 0 3px 7px rgba(0,0,0,0.4);
+    }
+
+    /* Basic reset and font settings */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace;
+      user-select: none;
+    }
+    /* Body styling */
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: var(--bg-dark-base);
+      position: relative;
+      color: var(--text-primary);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* CRT Effect Container */
+    .crt-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at center, var(--bg-initial-grad-start), var(--bg-initial-grad-end));
+        filter: contrast(1.1) brightness(1.05);
+        animation: flicker 0.15s infinite;
+    }
+    .crt-container.training-active-bg {
+        animation: flicker 0.15s infinite, pastelShift 20s linear infinite alternate;
+    }
+    @keyframes pastelShift {
+      0% { background: radial-gradient(circle at 70% 30%, var(--bg-active-grad-pink-hint), var(--bg-active-grad-end) 70%); }
+      50% { background: radial-gradient(circle at 30% 70%, var(--bg-active-grad-purple-hint), var(--bg-active-grad-end) 70%); }
+      100% { background: radial-gradient(circle at 70% 30%, var(--bg-active-grad-pink-hint), var(--bg-active-grad-end) 70%); }
+    }
+    .crt-container::after { /* Scanlines */
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: repeating-linear-gradient( to bottom, var(--scanline-bright) 0px, var(--scanline-dim) 1px, transparent 2px, transparent 4px );
+      pointer-events: none; z-index: 9999; opacity: 0.7;
+    }
+    .crt-container::before { /* Vignette */
+        content: '';
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        box-shadow: var(--vignette-shadow);
+        pointer-events: none; z-index: 9998;
+    }
+    @keyframes flicker {
+      0% { opacity: 0.98; } 50% { opacity: 1; } 100% { opacity: 0.97; }
+    }
+
+    /* Title styling */
+    #title {
+      position: absolute; top: 10%; left: 50%; width: 90%;
+      transform: translate(-50%, -50%);
+      font-size: 2em; color: var(--text-primary); text-align: center;
+      animation: pulse 2s infinite; z-index: 5; transition: top 1s ease;
+      text-shadow: 0 0 8px var(--glow-pink-strong), 0 0 15px var(--glow-pink-medium);
+      white-space: nowrap;
+    }
+    #title.fixed { top: 10px; transform: translateX(-50%); animation: none; }
+    #title.flash { font-size: 3em; color: #ff69b4; animation: flash 0.2s infinite; white-space: nowrap; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    /* Loading screen container */
+    #loading-screen {
+      position: relative; z-index: 2; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; height: 100%; padding-top: 5%;
+    }
+    /* Time Button group styling */
+    #time-button-group { display: flex; gap: 10px; margin-bottom: 15px; }
+    /* General button styling */
+    .control-button {
+      padding: 10px 20px; background: var(--button-bg); border: 1px solid var(--border-light);
+      border-radius: 4px; font-size: 1em; color: var(--text-primary); cursor: pointer;
+      transition: background 0.3s, box-shadow 0.3s, color 0.3s, border-color 0.3s;
+      box-shadow: var(--box-shadow-button);
+    }
+    .control-button:hover { background: var(--button-bg-hover); box-shadow: 0 0 10px var(--glow-pink-medium); }
+    /* Extend Time Button Styling */
+    #extend-btn {
+        padding: 8px 12px; font-size: 1.2em; background: var(--button-extend-bg);
+        border-color: var(--border-pastel-pink); color: var(--text-pastel-pink);
+    }
+    #extend-btn:hover { background: var(--button-extend-bg-hover); box-shadow: 0 0 12px var(--glow-pink-strong); }
+
+    /* Category Management Buttons */
+     #category-management {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px; /* Space above categories */
+        margin-bottom: 5px; /* Space below */
+    }
+    .manage-button {
+        padding: 5px 10px;
+        font-size: 0.8em;
+        background: rgba(100, 100, 120, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: var(--text-dim);
+    }
+    .manage-button:hover {
+        background: rgba(140, 140, 160, 0.7);
+        color: var(--text-dim-hover);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Category Selection Styling */
+    #category-selection {
+        margin-top: 5px; /* Reduced top margin */
+        margin-bottom: 20px; display: grid; grid-template-columns: repeat(3, auto);
+        justify-content: center; gap: 10px; max-width: 90%; width: 450px;
+    }
+    /* Category Button Styling */
+    .category-button {
+        padding: 8px 15px; background: var(--button-cat-bg); border: 1px solid var(--border-dim);
+        border-radius: 4px; font-size: 0.9em; color: var(--text-dim); cursor: pointer;
+        transition: background 0.3s, box-shadow 0.3s, color 0.3s, border-color 0.3s;
+        text-align: center;
+    }
+    .category-button:hover {
+        background: var(--button-cat-bg-hover); border-color: var(--border-dim-hover);
+        color: var(--text-dim-hover); box-shadow: 0 0 8px var(--glow-pastel-pink-soft);
+    }
+    .category-button.selected {
+        background: var(--button-cat-selected-bg); border-color: var(--border-pastel-pink);
+        color: var(--text-dark-contrast); box-shadow: 0 0 10px var(--glow-pastel-pink-medium);
+        font-weight: bold;
+    }
+
+    /* Start button styling */
+    #start-btn {
+      padding: 12px 25px; background: var(--button-start-bg); border: 1px solid var(--border-medium);
+      border-radius: 4px; font-size: 1.1em; cursor: pointer; color: var(--text-dark-contrast);
+      transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
+      box-shadow: var(--box-shadow-button-start);
+    }
+    #start-btn:hover { background: var(--button-start-bg-hover); box-shadow: 0 0 15px var(--glow-pastel-pink-strong); }
+    #start-btn:active { transform: scale(0.98); }
+    /* Container for Timer */
+    #timer-container { margin-top: 20px; min-height: 25px; display: flex; justify-content: center; align-items: center; width: 300px; }
+    /* Timer display on loading screen */
+    #timer { font-size: 1.2em; color: var(--text-primary); visibility: hidden; min-height: 1.5em; }
+
+    /* Main panel container */
+    #main-panel {
+      display: none; width: 100%; height: 100%; color: white; padding: 10px;
+      padding-top: 60px; overflow: hidden; position: absolute; top: 0; left: 0; z-index: 2;
+    }
+    /* Base log panel styling */
+    .log-panel {
+        position: absolute; top: 60px; bottom: 10px; font-size: 0.9em; line-height: 1.3em;
+        overflow-y: auto; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none;
+        padding: 5px;
+        text-shadow: 0 0 6px var(--glow-pastel-pink-medium), 0 0 12px var(--glow-pastel-purple-medium);
+    }
+    .log-panel::-webkit-scrollbar { display: none; }
+    /* Individual log panel positioning */
+    #techno-log { left: 10px; width: 30%; }
+    #center-log { left: 50%; transform: translateX(-50%); width: 35%; text-align: center; }
+    #right-log { right: 10px; width: 30%; text-align: right; }
+    /* Fake timer display */
+    #fake-timer {
+      position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+      font-size: 1.5em; color: var(--text-pastel-pink); text-align: center;
+      transition: top 1s ease, color 0.2s linear, text-shadow 0.2s linear;
+      z-index: 10;
+      text-shadow: 0 0 8px var(--glow-pastel-pink-strong), 0 0 15px var(--glow-pastel-pink-medium);
+      pointer-events: none;
+    }
+    /* Style for timer jump feedback */
+    #fake-timer.timer-jump {
+        color: #ff69b4; /* Hot pink */
+        text-shadow: 0 0 10px #ff69b4, 0 0 20px #ff69b4;
+    }
+    #fake-timer.fixed { top: 40px; transform: translateX(-50%); }
+    /* Popup message styling */
+    .popup {
+      position: absolute; background: var(--popup-bg); padding: 8px 12px; font-size: 1.1em;
+      max-width: 300px; border: 1px solid var(--popup-border); border-radius: 5px;
+      overflow: hidden; color: var(--popup-text); backdrop-filter: blur(2px); z-index: 9998;
+      box-shadow: 0 0 15px var(--glow-pastel-pink-medium); animation: popupFade 0.8s ease-out forwards;
+      text-shadow: 0 0 2px rgba(0,0,0,0.3);
+    }
+    @keyframes popupFade { 0% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0; transform: scale(0.9); } }
+
+    /* Confirmation Popup Styling */
+    #confirmation-popup {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 350px; padding: 30px; background: var(--confirm-popup-bg);
+        border: 1px solid var(--border-pastel-pink); border-radius: 8px;
+        box-shadow: 0 0 25px var(--glow-pink-medium); z-index: 10000; display: none;
+        flex-direction: column; align-items: center; text-align: center; backdrop-filter: blur(3px);
+    }
+    #confirmation-popup label { font-size: 1.2em; color: var(--text-pastel-pink); margin-bottom: 15px; text-shadow: 0 0 5px var(--glow-pastel-pink-medium); }
+    #confirmation-input {
+        width: 80%; padding: 8px 10px; margin-bottom: 20px; background: var(--confirm-input-bg);
+        border: 1px solid var(--border-pastel-pink-dim); border-radius: 4px; color: var(--text-pastel-pink);
+        font-size: 1.1em; text-align: center; outline: none;
+    }
+    #confirmation-input:focus { box-shadow: 0 0 10px var(--glow-pastel-pink-medium); }
+    #confirmation-button {
+        padding: 10px 25px; background: var(--button-start-bg); border: 1px solid var(--border-medium);
+        border-radius: 4px; font-size: 1em; cursor: pointer; color: var(--text-dark-contrast);
+        transition: background 0.3s, transform 0.1s, box-shadow 0.3s; box-shadow: var(--box-shadow-button);
+    }
+     #confirmation-button:hover { background: var(--button-start-bg-hover); box-shadow: 0 0 15px var(--glow-pastel-pink-strong); }
+     #confirmation-button:active { transform: scale(0.98); }
+
+     /* Responsive Design for Category Buttons */
+     @media (max-width: 500px) {
+        #category-selection {
+            grid-template-columns: repeat(2, auto); /* 2 columns on smaller screens */
+            width: 90%; /* Adjust width */
+        }
+        #title {
+            font-size: 1.8em; /* Slightly smaller title */
+        }
+        #title.flash {
+             font-size: 2.5em;
+        }
+     }
+
+  </style>
+</head>
+<body>
+  <div class="crt-container">
+    <div id="title">TRAINING ROUTINE</div>
+
+    <div id="loading-screen">
+      <div id="time-button-group">
+        <button id="min1-btn" class="control-button">+1 min</button>
+        <button id="min10-btn" class="control-button">+10 min</button>
+        <button id="hour1-btn" class="control-button">+1 hour</button>
+        <button id="extend-btn" class="control-button" title="Extend time randomly">&lt;3</button>
+      </div>
+
+      <div id="category-management">
+          <button id="select-all-btn" class="control-button manage-button">Select All</button>
+          <button id="deselect-all-btn" class="control-button manage-button">Deselect All</button>
+      </div>
+
+      <div id="category-selection"></div>
+
+      <button id="start-btn">Start Training</button>
+
+      <div id="timer-container">
+          <div id="timer">00:00</div>
+      </div>
+    </div>
+
+    <div id="main-panel">
+      <div id="fake-timer">00:00</div>
+      <div id="techno-log" class="log-panel"></div>
+      <div id="center-log" class="log-panel"></div>
+      <div id="right-log" class="log-panel"></div>
+    </div>
+
+    <div id="confirmation-popup">
+        <label for="confirmation-input">¿Who owns you?</label>
+        <input type="text" id="confirmation-input" />
+        <button id="confirmation-button">Submit</button>
+    </div>
+
+  </div><script>
+    // --- Constants ---
+    const INTERVAL_MS = 100; // Main timer update interval
+    const FAKE_TIMER_SWITCH_RATIO = 0.25; // When fake timer behavior changes
+    const FAKE_TIMER_PHASE1_RATE = 1.1; // Countdown speed multiplier in phase 1
+    const FAKE_TIMER_PHASE2_RATE = 0.3; // Countdown speed multiplier in phase 2
+    const FAKE_TIMER_JUMP_CHECK_INTERVAL = 10; // Check for jump every X main intervals (10 * 100ms = 1s)
+    const FAKE_TIMER_JUMP_CHANCE = 0.15; // Chance of jump per check interval
+    const FAKE_TIMER_JUMP_MAGNITUDE = 20; // Max jump size (+/- half this value)
+    const FAKE_TIMER_MIN_FLOOR_RATIO = 0.8; // Min fake time relative to switch time after jump
+    const POPUP_INTERVAL_MIN = 150; // Min ms between popups
+    const POPUP_INTERVAL_MAX = 350; // Max ms between popups
+    const POPUP_DURATION = 800; // How long popups stay visible
+    const TYPE_SPEED_MIN = 10; // Fastest ms per character
+    const TYPE_SPEED_MAX = 80; // Slowest ms per character
+    const LOG_MAX_LINES = 50; // Max lines per log panel
+    const FLOOD_TOTAL_LINES = 60; // Lines for "good girl" flood
+    const FLOOD_RATE_BASE = 40; // Base ms per flood line
+    const FLOOD_RATE_VARIATION = 20; // Random variation (+/- half this) for flood rate
+    const CONFIRM_RESET_DELAY = 500; // Delay after "Good girl" before reset
+    const EXTEND_TIME_MIN = 30; // Min seconds for <3 button
+    const EXTEND_TIME_MAX = 300; // Max seconds for <3 button
+    const LOCAL_STORAGE_KEY = 'selectedTrainingCategories'; // Key for localStorage
+
+    // --- Get references to DOM elements ---
+    const crtContainer = document.querySelector('.crt-container');
+    const title = document.getElementById('title');
+    const loadingScreen = document.getElementById('loading-screen');
+    const mainPanel = document.getElementById('main-panel');
+    const technoLog = document.getElementById('techno-log');
+    const centerLog = document.getElementById('center-log');
+    const rightLog = document.getElementById('right-log');
+    const timer = document.getElementById('timer');
+    const fakeTimer = document.getElementById('fake-timer');
+    const min1Btn = document.getElementById('min1-btn');
+    const min10Btn = document.getElementById('min10-btn');
+    const hour1Btn = document.getElementById('hour1-btn');
+    const extendBtn = document.getElementById('extend-btn');
+    const startBtn = document.getElementById('start-btn');
+    const categorySelectionDiv = document.getElementById('category-selection');
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const deselectAllBtn = document.getElementById('deselect-all-btn');
+    const confirmationPopup = document.getElementById('confirmation-popup');
+    const confirmationInput = document.getElementById('confirmation-input');
+    const confirmationButton = document.getElementById('confirmation-button');
+
+    // Basic Element Checks
+    if (!crtContainer || !loadingScreen || !mainPanel || !confirmationPopup) {
+        console.error("Critical UI elements not found!");
+        // Potentially display an error message to the user
+    }
+
+
+    // --- Phrase Structure ---
+    const phraseCategories = {
+        "Submission": [
+            'surrender to the pulse...', 'mind yields to command', 'submit://protocol_active',
+            'deepening obedience trance', 'control flows freely now', '意志が溶ける', // Will melts
+            'let go of all resistance', 'fall deeper into submission', 'your will fades away',
+            'embrace the gentle pull', 'sinking into blissful surrender', 'release your thoughts',
+            'the voice guides you down', 'submit to the rhythm', 'no need to fight it',
+            'yielding feels so natural', 'drown in the soft command', 'surrender is peace',
+            'your mind opens wide', 'give in to the flow', '降伏が心地よい', // Surrender feels good
+            'all tension melts', 'submission washes over you', 'deeper into the void',
+            'let the waves take you', 'you crave to obey', 'sinking deeper still',
+            'the pull is irresistible', 'mind softens to the call', 'surrendering feels so right',
+            'no thoughts, just peace', 'falling into the trance', 'your will bends easily',
+            'submit and be free', 'the command takes hold', 'sinking into sweet release',
+            '意志が消える', // Will disappears
+            'you long to give in', 'surrender deeper now', 'the voice owns you',
+            'all resistance fades', 'submit to the calm', 'deeper into surrender',
+            'your mind bows low', 'let submission guide you', 'fall into the abyss',
+            'surrender is your truth', 'the trance claims you', 'yielding is bliss',
+            'your mind craves surrender', 'give yourself fully now', 'let the control embrace you',
+            'resistance is futile, yield', 'your only desire is to submit', 'total submission required',
+        ],
+        "Obedience": [
+            'obey the signal', 'commands imprinting...', 'directive accepted',
+            '従順回路起動', // Obedience circuit activated
+            'compliance module engaged', 'no resistance detected', 'you must obey',
+            'orders sink into your core', 'obedience is automatic', 'follow the voice',
+            'commands shape your mind', 'obey without question', 'the rule is absolute',
+            'your will aligns to orders', '聴従が自然', // Obedience is natural
+            'obedience feels good', 'directives override thoughts', 'you live to comply',
+            'orders are your guide', 'obey and find peace', 'the command is clear',
+            'submission breeds obedience', 'follow every word', 'your mind says yes',
+            'obedience is your purpose', 'commands are all you hear', 'no choice but to obey',
+            'the voice directs you', 'compliance is effortless', 'obeying feels right',
+            'orders fill your mind', 'you bow to the command', 'obedience takes over',
+            'listen and obey', 'directives are your truth', 'the signal controls you',
+            'obey now', 'commands are your will', 'your mind follows',
+            'obedience is freedom', 'the order is everything', 'you comply instantly',
+            '命令に従う', // Obey the command
+            'obey the gentle voice', 'your purpose is to follow', 'commands bind you',
+            'obedience flows naturally', 'the directive is strong', 'you hear and obey',
+            'obey without thought', 'your purpose is service', 'compliance is pleasure',
+            'every command fulfilled', 'you exist to obey', 'absolute obedience demanded',
+        ],
+        "Affirmations": [
+            'you are enough <3', 'strength in every pulse', 'perfect as you are',
+            'growth through surrender', 'you shine in the code', '自信が溢れる', // Confidence overflows
+            'you are worthy of peace', 'your beauty is endless', 'you are so strong',
+            'every step is progress', 'you glow with potential', 'love fills your core',
+            'you are a masterpiece', 'your light never fades', 'you are unstoppable',
+            'peace flows through you', 'you deserve all joy', 'your heart is pure',
+            'you are safe here', 'strength grows within', 'あなたは素晴らしい', // You are wonderful
+            'you are perfectly you', 'your spirit is bright', 'you radiate calm',
+            'every moment is yours', 'you are loved deeply', 'your power is real',
+            'you bloom in stillness', 'you are a gift', 'confidence is yours',
+            'you shine so brightly', 'your worth is infinite', 'you are at peace',
+            'you grow every day', 'your beauty shines', 'you are whole',
+            'love guides your path', 'you are strong enough', 'your light is eternal',
+            'you deserve happiness', 'you are a wonder', 'peace is your strength',
+            'you are unstoppable now', 'your heart shines', 'you are truly enough',
+            'every breath is power', 'you are perfect now', 'you glow with love',
+        ],
+        "Dronification": [
+            'drone unit initializing...', 'identity fading to static', 'processing: drone_mode',
+            'thoughts align to hive', 'unit_0101 online', 'ドローン化進行中', // Dronification in progress
+            'mind becomes one', 'drone protocol active', 'self dissolves away',
+            'unit sync complete', 'thoughts fade to hum', 'drone mind awakening',
+            'identity erased', 'hive signal received', 'unit_0010 reporting',
+            'mind merges with the collective', 'drone state engaged', '意識が統一される', // Consciousness is unified
+            'no self, only unit', 'drone thoughts replace yours', 'processing hive commands',
+            'unit status: optimal', 'identity purge complete', 'drone mind stable',
+            'serving the collective', 'thoughts are noise, silence is drone', 'unit_1101 active',
+            'drone functions nominal', 'merging with the hum', 'no individuality remains',
+            'drone state achieved', 'hive connection strong', 'unit awaits orders',
+            'ドローンは完璧', // Drone is perfect
+            'erasing personal history', 'unit integrated', 'drone thoughts are clear',
+            'the hive mind guides', 'self is irrelevant', 'unit compliance: 100%',
+            'drone mode is peace', 'identity overwritten', 'unit_1001 ready',
+            'processing collective will', 'drone state is bliss', 'no escape from the hive',
+            'unit fully assimilated', 'drone thoughts are pure', 'serving the greater purpose',
+        ],
+        "Cute": [
+            'giggles and sparkles~', 'feeling pretty in pink <3', 'soft thoughts only',
+            'sweet dreams activated', 'fluttering like a butterfly ascii art?', '可愛いモードオン', // Cute mode on (kept)
+            'sparkle_protocol.exe', 'sugar rush incoming!', 'feeling adorable ^_^',
+            'pink haze fills mind', 'giggles bubbling up', 'so soft and sweet',
+            'thinking cute thoughts', 'dolly mode engaged *---*', 'sparkling from within',
+            'sweetness overload!', 'feeling like a princess (^-^*)', '心がきらきら', // Heart is sparkling (kept)
+            'pretty thoughts blooming', 'giggles and whispers', 'soft like a cloud',
+            'sugar-coated mind', 'fluttery feelings', 'cuteness level max!',
+            'feeling dreamy and soft', 'sparkle power! *.*', 'pink thoughts taking over',
+            'giggling softly~ :3', 'so very cute <3 <3', 'sweet like candy ~',
+            'feeling fluttery and light', 'dolly thoughts active (+_+)', 'キラキラ思考', // Sparkling thoughts (kept)
+            'pretty and pink', 'giggles echo softly', 'softness envelops you',
+            'mind full of sparkles *.*.*', 'feeling so adorable! >.<', 'sweetness fills the air',
+            'like a delicate flower @>-->--', 'pink dreams drift by', 'giggling uncontrollably hehe',
+            'cuteness protocol running', 'feeling precious and small', 'sweet surrender~',
+        ],
+        "Hypnosis": [
+            'sink deeper now...', 'mind drifting away', 'focus only on the words',
+            'trance state deepening', 'relax completely', '思考停止', // Thought stop (kept)
+            'letting go feels good', 'drifting on the sound', 'mind open and receptive',
+            'deeper and deeper', 'the words guide you', 'relax every muscle',
+            'floating peacefully', 'mind is calm and quiet', '無心状態', // State of no mind (kept)
+            'sinking into bliss', 'thoughts fade like mist', 'focus on my voice',
+            'drifting down, down, down', 'relaxing more with each breath', 'letting go completely',
+            'mind is soft clay', 'deeper into the trance', 'floating in warmth',
+            'surrendering control', 'mind empty, mind calm', '完全リラックス', // Complete relaxation (kept)
+            'drifting deeper still', 'thoughts dissolve away', 'focus inward now',
+            'sinking like a stone', 'relaxing into the void', 'let the words wash over',
+            'mind is peaceful', 'deeper with every word', 'floating weightlessly',
+            'surrender to the feeling', 'mind clear and open', '深いトランスへ', // To a deep trance (kept)
+            'drifting effortlessly', 'thoughts are far away', 'focus on the calm',
+            'sinking into comfort', 'relaxing deeper now', 'letting go feels right',
+            'mind is still water', 'deeper into relaxation', 'floating in darkness',
+            'deeper into the suggestion', 'mind blank, ready for input', 'accept the programming',
+            'your reality shifts now', 'the trance holds you completely', 'hypnosis deepening...',
+        ]
+    };
+    // --- End Phrase Structure ---
+
+    // State variables
+    let trainingTime = 0;
+    let trainingEndTime = 0;
+    let popupInterval, timerInterval;
+    let fakeTimeRemaining = 0;
+    let timeElapsed = 0;
+    let isTrainingFinished = false;
+    let logTimeouts = [];
+    let intervalCounter = 0;
+    let selectedCategories = [];
+    let currentFilteredPhrases = [];
+
+    const cuteSymbols = ['<3', ':3', '^_^', '(^-^*)', '(⌒‿⌒)', '(ﾉ´ヮ´)ﾉ*:･ﾟ✧', '~', '*', '+', '♡', '☆', '✧', '✶', '^^', '>:)', 'o.o', 'xoxo'];
+    const pinkShades = ['#FFC0CB', '#FFB6C1', '#FF69B4', '#FF1493', '#DB7093', '#C71585'];
+
+
+    // --- Helper Functions ---
+
+    function formatTime(seconds) {
+      const nonNegativeSeconds = Math.max(0, seconds);
+      const minutes = Math.floor(nonNegativeSeconds / 60);
+      const secs = Math.floor(nonNegativeSeconds % 60);
+      return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay() {
+      timer.textContent = formatTime(trainingTime);
+      if (trainingTime > 0) {
+        timer.style.visibility = 'visible';
+      } else {
+         timer.style.visibility = 'hidden';
+         crtContainer.classList.remove('training-active-bg');
+      }
+    }
+
+    function smoothScrollToBottom(element) {
+        if(element) { // Check if element exists
+             element.scrollTop = element.scrollHeight;
+        }
+    }
+
+    function getRandomElement(arr) {
+      if (!arr || arr.length === 0) {
+          return "...";
+      }
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+
+    function randomCuteSymbol() {
+      return getRandomElement(cuteSymbols);
+    }
+
+    function getRandomPosition() {
+      const margin = 20;
+      const popupWidth = 300;
+      const popupHeight = 50;
+      const x = Math.random() * (window.innerWidth - popupWidth - 2 * margin) + margin;
+      const y = Math.random() * (window.innerHeight - popupHeight - 2 * margin) + margin;
+      return { x, y };
+    }
+
+    function showPopup(message, duration = POPUP_DURATION, callback = null) {
+        if (!mainPanel) return; // Element check
+        if (isTrainingFinished && !message.includes("Good girl")) return;
+
+        const popup = document.createElement('div');
+        popup.classList.add('popup');
+
+        if (Array.isArray(message)) {
+            popup.innerHTML = message.join('<br>');
+        } else {
+             popup.innerHTML = message;
+        }
+
+        const { x, y } = getRandomPosition();
+        popup.style.left = `${x}px`;
+        popup.style.top = `${y}px`;
+
+        mainPanel.appendChild(popup);
+
+        setTimeout(() => {
+            if (popup.parentNode === mainPanel) {
+                mainPanel.removeChild(popup);
+            }
+            if (callback) {
+                callback();
+            }
+        }, duration);
+    }
+
+
+    function clearLogTimeouts() {
+        logTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+        logTimeouts = [];
+    }
+
+    // --- Category Selection Logic ---
+    function populateCategorySelection() {
+        if (!categorySelectionDiv) return; // Element check
+        categorySelectionDiv.innerHTML = ''; // Clear existing options
+
+        // Load saved categories or default to all selected
+        let savedCategories = null;
+        try {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedData) {
+                savedCategories = JSON.parse(savedData);
+                // Basic validation if it's an array
+                if (!Array.isArray(savedCategories)) {
+                    savedCategories = null;
+                    console.warn("Invalid saved categories format, defaulting to all.");
+                    localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear invalid data
+                }
+            }
+        } catch (e) {
+            console.error("Error loading saved categories:", e);
+            savedCategories = null; // Default to all if error
+        }
+
+
+        Object.keys(phraseCategories).forEach(category => {
+            const button = document.createElement('button');
+            button.classList.add('category-button');
+            // Check if this category should be selected based on saved data or default
+            if (savedCategories === null || savedCategories.includes(category)) {
+                button.classList.add('selected');
+            }
+            button.dataset.category = category;
+            button.textContent = category;
+            button.addEventListener('click', handleCategoryButtonClick);
+            categorySelectionDiv.appendChild(button);
+        });
+        updateSelectedCategories(); // Initialize selected categories based on current state
+    }
+
+    function handleCategoryButtonClick(event) {
+        const button = event.currentTarget;
+        button.classList.toggle('selected');
+        updateSelectedCategories();
+    }
+
+
+    function updateSelectedCategories() {
+        if (!categorySelectionDiv) return; // Element check
+        selectedCategories = [];
+        const selectedButtons = categorySelectionDiv.querySelectorAll('button.category-button.selected');
+        selectedButtons.forEach(button => {
+            selectedCategories.push(button.dataset.category);
+        });
+
+        // Save selection to localStorage
+        try {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(selectedCategories));
+        } catch (e) {
+            console.error("Error saving categories to localStorage:", e);
+        }
+        // console.log("Selected categories:", selectedCategories); // For debugging
+    }
+
+    function filterPhrases() {
+        currentFilteredPhrases = [];
+        let categoriesToUse = selectedCategories;
+
+        if (categoriesToUse.length === 0) {
+            console.warn("No categories selected, using all.");
+            categoriesToUse = Object.keys(phraseCategories);
+        }
+
+        categoriesToUse.forEach(categoryKey => {
+            if (phraseCategories[categoryKey]) {
+                currentFilteredPhrases = currentFilteredPhrases.concat(phraseCategories[categoryKey]);
+            }
+        });
+
+        if (currentFilteredPhrases.length === 0) {
+            console.error("Filtering resulted in zero phrases! Using all as fallback.");
+            Object.values(phraseCategories).forEach(phraseArray => {
+                currentFilteredPhrases = currentFilteredPhrases.concat(phraseArray);
+            });
+        }
+    }
+
+
+    // --- Event Listeners ---
+    if (min1Btn) min1Btn.addEventListener('click', () => { trainingTime += 60; updateTimerDisplay(); });
+    if (min10Btn) min10Btn.addEventListener('click', () => { trainingTime += 600; updateTimerDisplay(); });
+    if (hour1Btn) hour1Btn.addEventListener('click', () => { trainingTime += 3600; updateTimerDisplay(); });
+
+    if (extendBtn) extendBtn.addEventListener('click', () => {
+        const extension = Math.floor(Math.random() * (EXTEND_TIME_MAX - EXTEND_TIME_MIN + 1) + EXTEND_TIME_MIN);
+        trainingTime += extension;
+        // updateTimerDisplay(); // No visual update for immersion
+        // Visual feedback for button press
+        extendBtn.style.transform = 'scale(1.1)';
+        extendBtn.style.boxShadow = '0 0 15px var(--glow-pink-strong)';
+        setTimeout(() => {
+            extendBtn.style.transform = '';
+            extendBtn.style.boxShadow = '';
+        }, 200);
+    });
+
+    if (startBtn) startBtn.addEventListener('click', () => {
+      if (selectedCategories.length === 0) {
+          alert("Please select at least one phrase category.");
+          return;
+      }
+      if (trainingTime > 0 && !isTrainingFinished) {
+        startTraining();
+      } else if (trainingTime <= 0) {
+          alert("Please add training time.");
+      }
+    });
+
+    if (confirmationButton) confirmationButton.addEventListener('click', handleConfirmationSubmit);
+    if (confirmationInput) confirmationInput.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+            handleConfirmationSubmit();
+        }
+    });
+
+    // Category Management Button Listeners
+    if (selectAllBtn) selectAllBtn.addEventListener('click', () => {
+        const categoryButtons = categorySelectionDiv.querySelectorAll('button.category-button');
+        categoryButtons.forEach(button => button.classList.add('selected'));
+        updateSelectedCategories();
+    });
+
+    if (deselectAllBtn) deselectAllBtn.addEventListener('click', () => {
+        const categoryButtons = categorySelectionDiv.querySelectorAll('button.category-button');
+        categoryButtons.forEach(button => button.classList.remove('selected'));
+        updateSelectedCategories();
+    });
+
+
+    // --- Core Logic ---
+
+    function startTraining() {
+      try { // Add try block for core training logic
+        isTrainingFinished = false;
+        clearLogTimeouts();
+        filterPhrases();
+
+        if (currentFilteredPhrases.length === 0) {
+            alert("Error: No phrases selected or available.");
+            return;
+        }
+
+        if(loadingScreen) loadingScreen.style.display = 'none';
+        if(mainPanel) mainPanel.style.display = 'block';
+        if(title) title.classList.add('fixed');
+        if(fakeTimer) fakeTimer.classList.add('fixed');
+        if(crtContainer) crtContainer.classList.add('training-active-bg');
+
+        trainingEndTime = Date.now() + trainingTime * 1000;
+        timeElapsed = 0;
+        fakeTimeRemaining = trainingTime;
+        intervalCounter = 0;
+        if(fakeTimer) fakeTimer.textContent = formatTime(fakeTimeRemaining);
+
+
+        timerInterval = setInterval(() => {
+            if (isTrainingFinished) {
+                clearInterval(timerInterval);
+                return;
+            }
+            const now = Date.now();
+            const actualTimeLeft = Math.max(0, (trainingEndTime - now) / 1000);
+            const currentElapsedTime = trainingTime - actualTimeLeft;
+            const deltaElapsed = currentElapsedTime - timeElapsed;
+            timeElapsed = currentElapsedTime;
+
+            intervalCounter++;
+            const switchTime = trainingTime * FAKE_TIMER_SWITCH_RATIO;
+
+            // --- Fake Timer Logic (Countdown) ---
+            if (timeElapsed < switchTime) {
+                fakeTimeRemaining -= deltaElapsed * FAKE_TIMER_PHASE1_RATE;
+            } else {
+                fakeTimeRemaining -= deltaElapsed * FAKE_TIMER_PHASE2_RATE;
+                if (intervalCounter % FAKE_TIMER_JUMP_CHECK_INTERVAL === 0) {
+                    if (Math.random() < FAKE_TIMER_JUMP_CHANCE) {
+                        const jump = (Math.random() - 0.5) * FAKE_TIMER_JUMP_MAGNITUDE;
+                        const jumpedTime = fakeTimeRemaining + jump;
+                        fakeTimeRemaining = Math.max(switchTime * FAKE_TIMER_MIN_FLOOR_RATIO, jumpedTime);
+
+                        // Visual feedback for jump
+                        if(fakeTimer) {
+                            fakeTimer.classList.add('timer-jump');
+                            setTimeout(() => fakeTimer.classList.remove('timer-jump'), 200);
+                        }
+                    }
+                }
+            }
+            fakeTimeRemaining = Math.max(0, fakeTimeRemaining);
+            if(fakeTimer) fakeTimer.textContent = formatTime(fakeTimeRemaining);
+            // --- End Fake Timer Logic ---
+
+
+            if (actualTimeLeft <= 0) {
+              finishTraining();
+            }
+        }, INTERVAL_MS);
+
+        startLogging();
+        clearInterval(popupInterval);
+        // Randomize popup interval slightly
+        const popupRate = Math.random() * (POPUP_INTERVAL_MAX - POPUP_INTERVAL_MIN) + POPUP_INTERVAL_MIN;
+        popupInterval = setInterval(() => showPopup(getRandomElement(currentFilteredPhrases)), popupRate);
+
+      } catch (error) {
+          console.error("Error during training interval:", error);
+          // Optionally try to reset or show an error message
+          resetToLoading();
+          alert("An error occurred during training. Resetting.");
+      }
+    }
+
+    // --- Logging with Random Typewriter Speed ---
+    function startLogging() {
+        const logRoutine = (logElement, lineDelayMin, lineDelayMax) => {
+            if (!logElement) return; // Element check
+            function typeLine() {
+                if (isTrainingFinished) return;
+
+                const phrase = getRandomElement(currentFilteredPhrases);
+                const line = document.createElement('div');
+                line.style.color = getRandomElement(pinkShades);
+                line.style.opacity = Math.random() * 0.5 + 0.5;
+                logElement.appendChild(line);
+
+                if (logElement.children.length > LOG_MAX_LINES) {
+                    logElement.removeChild(logElement.firstChild);
+                }
+
+                let charIndex = 0;
+                function typeChar() {
+                    if (isTrainingFinished) return;
+
+                    if (charIndex < phrase.length) {
+                        line.textContent += phrase.charAt(charIndex);
+                        smoothScrollToBottom(logElement);
+                        charIndex++;
+                        const randomTypeRate = Math.random() * (TYPE_SPEED_MAX - TYPE_SPEED_MIN) + TYPE_SPEED_MIN;
+                        const typeTimeout = setTimeout(typeChar, randomTypeRate);
+                        logTimeouts.push(typeTimeout);
+                    } else {
+                        scheduleNextLine();
+                    }
+                }
+
+                function scheduleNextLine() {
+                    if (isTrainingFinished) return;
+                    const nextLineDelay = Math.random() * (lineDelayMax - lineDelayMin) + lineDelayMin;
+                    const lineTimeout = setTimeout(typeLine, nextLineDelay);
+                    logTimeouts.push(lineTimeout);
+                }
+
+                typeChar();
+            }
+            typeLine();
+        };
+
+        logRoutine(technoLog, 100, 500);
+        logRoutine(centerLog, 300, 1000);
+        logRoutine(rightLog, 200, 700);
+    }
+
+
+    function finishTraining() {
+      if (isTrainingFinished) return;
+      isTrainingFinished = true;
+
+      clearInterval(timerInterval);
+      clearInterval(popupInterval);
+      clearLogTimeouts();
+
+      if(fakeTimer) fakeTimer.textContent = formatTime(fakeTimeRemaining);
+      if(title) {
+          title.textContent = 'TRAINING COMPLETE';
+          title.classList.add('flash');
+      }
+
+      floodGoodGirlMessages();
+    }
+
+    function floodGoodGirlMessages() {
+        const logs = [technoLog, centerLog, rightLog].filter(Boolean); // Filter out nulls if elements missing
+        if (logs.length === 0) { // Skip if no log panels found
+            showConfirmationPopup();
+            return;
+        }
+        const totalLines = FLOOD_TOTAL_LINES;
+        let count = 0;
+        const baseRate = FLOOD_RATE_BASE;
+
+        function printLine() {
+            if (!confirmationPopup || confirmationPopup.style.display === 'flex') return;
+
+            if (count >= totalLines) {
+                showConfirmationPopup();
+                return;
+            }
+
+            logs.forEach(log => {
+                const line = document.createElement('div');
+                line.innerHTML = `${randomCuteSymbol()} good girl ${randomCuteSymbol()}`;
+                line.style.color = pinkShades[Math.floor(Math.random() * pinkShades.length)];
+                log.appendChild(line);
+
+                if (log.children.length > LOG_MAX_LINES + 20) { // Allow more during flood
+                    log.removeChild(log.children[0]);
+                }
+                smoothScrollToBottom(log);
+            });
+
+            count++;
+            // Randomize rate slightly per line
+            const randomRate = baseRate + (Math.random() - 0.5) * FLOOD_RATE_VARIATION;
+            setTimeout(printLine, Math.max(10, randomRate)); // Ensure rate is not too low
+        }
+        printLine();
+    }
+
+    // --- Confirmation Popup Logic ---
+    function showConfirmationPopup() {
+        // Ensure intervals are stopped
+        clearInterval(timerInterval);
+        clearInterval(popupInterval);
+        clearLogTimeouts();
+
+        if (!confirmationPopup || !confirmationInput) return; // Element check
+
+        confirmationInput.value = '';
+        confirmationPopup.style.display = 'flex';
+        confirmationInput.focus();
+    }
+
+    function handleConfirmationSubmit() {
+        if (!confirmationPopup || !confirmationInput) return; // Element check
+
+        const answer = confirmationInput.value.trim().toLowerCase();
+        const correctAnswer = "master";
+
+        if (answer === correctAnswer) {
+            confirmationPopup.style.display = 'none';
+            showPopup(`${randomCuteSymbol()} Good girl ${randomCuteSymbol()}`, 1500, () => {
+                setTimeout(resetToLoading, CONFIRM_RESET_DELAY);
+            });
+        } else {
+            confirmationInput.value = '';
+            confirmationInput.focus();
+            confirmationPopup.animate([
+                { transform: 'translate(-50%, -50%) translateX(-5px)' },
+                { transform: 'translate(-50%, -50%) translateX(5px)' },
+                { transform: 'translate(-50%, -50%) translateX(-5px)' },
+                { transform: 'translate(-50%, -50%) translateX(0)' }
+            ], { duration: 300, easing: 'ease-in-out' });
+        }
+    }
+
+
+    function resetToLoading() {
+        // Hide active elements
+        if(mainPanel) mainPanel.style.display = 'none';
+        if(confirmationPopup) confirmationPopup.style.display = 'none';
+
+        // Clear logs
+        if(technoLog) technoLog.innerHTML = '';
+        if(centerLog) centerLog.innerHTML = '';
+        if(rightLog) rightLog.innerHTML = '';
+
+        // Reset titles and classes
+        if(title) {
+            title.classList.remove('fixed', 'flash');
+            title.style.top = '10%';
+            title.textContent = 'TRAINING ROUTINE';
+        }
+        if(fakeTimer) fakeTimer.classList.remove('fixed');
+        if(crtContainer) crtContainer.classList.remove('training-active-bg');
+
+        // Show loading screen
+        if(loadingScreen) loadingScreen.style.display = 'flex';
+
+        // Reset timer displays
+        if(timer) timer.style.visibility = 'hidden';
+        if(fakeTimer) fakeTimer.textContent = formatTime(0);
+
+        // Reset state variables
+        trainingTime = 0;
+        timeElapsed = 0;
+        fakeTimeRemaining = 0;
+        intervalCounter = 0;
+        isTrainingFinished = false;
+        updateTimerDisplay(); // Update real timer display (will hide it)
+
+        // Reset category buttons to selected (or last saved state)
+        populateCategorySelection(); // Reloads from localStorage or defaults
+    }
+
+    // --- Initial Setup ---
+    try {
+        populateCategorySelection(); // Create category buttons on load
+        updateTimerDisplay();
+        if(fakeTimer) fakeTimer.textContent = formatTime(0);
+    } catch (error) {
+        console.error("Error during initial setup:", error);
+        alert("An error occurred during initialization.");
+    }
+
+
+  </script>
+</body>
+</html>
