@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Training Console</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <style>
     /* --- CSS Variables --- */
     /* Defaults (Pastel Theme) defined in :root */
@@ -234,7 +235,8 @@
     .category-button:hover:not(:disabled) {
         /* Use theme variables */
         background: var(--button-secondary-bg-hover); border-color: var(--border-secondary-hover);
-        color: var(--text-secondary-hover); box-shadow: 0 0 8px var(--glow-accent-2-soft);
+        color: var(--text-secondary-hover);
+        box-shadow: 0 0 8px var(--glow-accent-2-soft); /* Use theme variable for glow */
     }
     /* Style for selected category buttons */
     .category-button.selected {
@@ -371,6 +373,23 @@
              width: 80%;
              max-width: 280px; /* Keep max-width or adjust if needed */
          }
+         /* Adjust metronome panel for small screens */
+         #metronome-container {
+             /* Allow it to shrink naturally */
+             max-width: none;
+         }
+         #metronome-controls label {
+             /* Keep label hidden */
+             /* display: none; */ /* Re-enable label if needed */
+         }
+         #metronome-bpm-input {
+             width: 45px; /* Narrower input */
+         }
+         #metronome-wave-selector button {
+             width: 24px;
+             padding: 3px;
+             font-size: 1em;
+         }
      }
 
      /* Shake animation for incorrect confirmation */
@@ -393,8 +412,7 @@
         background: var(--button-primary-bg);
         border: 1px solid var(--border-primary);
         color: var(--text-primary);
-        /* Adjusted padding for hamburger icon */
-        padding: 8px 10px;
+        padding: 0; /* Remove padding for icon centering */
         border-radius: 4px; /* Match control-button */
         cursor: pointer;
         transition: background 0.3s, box-shadow 0.3s, border-color 0.3s; /* Match control-button transition */
@@ -411,7 +429,6 @@
         background: var(--button-primary-bg-hover);
         box-shadow: 0 0 10px var(--glow-accent-1-medium); /* Match control-button hover */
         border-color: var(--border-primary-hover); /* Match control-button hover */
-        /* Removed rotation */
      }
      /* Hamburger icon lines */
      #settings-btn span {
@@ -558,8 +575,200 @@
       }
 
 
-    /* --- Matrix Theme Variable Overrides --- */
-    /* REMOVED - Variables are now set via JS */
+    /* --- Metronome Controls --- */
+    #metronome-container { /* Outer container */
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 1000;
+        background: var(--settings-panel-bg);
+        border: 1px solid var(--settings-panel-border);
+        border-radius: 6px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+        display: flex;
+        flex-direction: column; /* Make outer container column */
+        width: auto; /* Allow shrinking */
+    }
+    #metronome-toggle-collapse-btn { /* Button for collapse - styled like settings */
+        background: var(--button-primary-bg);
+        border: 1px solid var(--border-primary);
+        color: var(--text-primary);
+        padding: 0; /* Remove padding */
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
+        box-shadow: var(--box-shadow-button);
+        display: flex; /* Use flex to center icon */
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        width: 36px; /* Match settings button */
+        height: 34px; /* Match settings button */
+        align-self: center; /* Center button within container */
+        margin: 4px; /* Add some margin */
+    }
+    #metronome-toggle-collapse-btn:hover {
+        background: var(--button-primary-bg-hover);
+        box-shadow: 0 0 10px var(--glow-accent-1-medium); /* Match settings button hover */
+        border-color: var(--border-primary-hover);
+        color: var(--text-primary); /* Keep icon color */
+    }
+     #metronome-toggle-collapse-btn .icon { /* Style for icon */
+        display: inline-block;
+        font-size: 1.4em; /* Adjust icon size */
+        line-height: 1;
+        /* Removed transform: rotate(90deg) for arrow */
+     }
+     /* Style for the button when the panel is open */
+     #metronome-container.open #metronome-toggle-collapse-btn {
+         /* Example: slightly change background or border */
+         background: var(--button-primary-bg-hover);
+         border-color: var(--border-primary-hover);
+     }
+
+
+    #metronome-controls { /* Inner container for actual controls */
+        padding: 0; /* No padding when closed */
+        border: none; /* No border when closed */
+        display: flex;
+        flex-direction: column; /* Vertical layout */
+        align-items: center; /* Center items horizontally */
+        gap: 8px;
+        max-height: 0; /* Collapsed by default */
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, padding 0.3s ease-out, border-top 0.3s ease-out; /* Add transitions */
+        width: 100%; /* Take full width of container */
+    }
+    #metronome-container.open #metronome-controls {
+        max-height: 300px; /* Adjust as needed */
+        padding: 8px; /* Restore padding when open */
+        border-top: 1px solid var(--border-secondary); /* Add separator when open */
+    }
+
+    /* Remove row wrapper */
+    /* .metronome-row { ... } REMOVED */
+
+    #metronome-toggle-btn { /* Play/Stop button */
+        background: var(--button-primary-bg);
+        border: 1px solid var(--border-primary);
+        color: var(--text-primary);
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1.1em; /* Make icon slightly larger */
+        line-height: 1;
+        transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+        width: 35px; /* Fixed width */
+        text-align: center;
+        /* margin-bottom: 5px; /* Space below */
+    }
+    #metronome-toggle-btn:hover {
+        background: var(--button-primary-bg-hover);
+        border-color: var(--border-primary-hover);
+        box-shadow: 0 0 8px var(--glow-accent-1-medium); /* Add glow on hover */
+    }
+    #metronome-wave-selector {
+        display: flex; /* Make wave buttons vertical */
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        width: 100%;
+        /* margin-bottom: 5px; /* Space below */
+    }
+    #metronome-wave-selector button {
+        background: var(--button-secondary-bg);
+        border: 1px solid var(--border-secondary);
+        color: var(--text-secondary);
+        padding: 4px; /* Adjust padding */
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1.1em; /* Make symbols larger */
+        line-height: 1;
+        width: 35px; /* Match play button width */
+        text-align: center;
+        transition: background 0.3s, color 0.3s, border-color 0.3s;
+    }
+     #metronome-wave-selector button:hover {
+        background: var(--button-secondary-bg-hover);
+        border-color: var(--border-secondary-hover);
+        color: var(--text-secondary-hover);
+     }
+     #metronome-wave-selector button.selected {
+        background: var(--button-confirm-bg);
+        border-color: var(--border-accent-1);
+        color: var(--text-contrast);
+        font-weight: bold;
+     }
+
+    #metronome-controls .bpm-group { /* Group label and input */
+        display: flex;
+        flex-direction: column; /* Stack vertically */
+        align-items: center; /* Center horizontally */
+        justify-content: center;
+        width: 100%;
+        gap: 4px; /* Space between label (if shown) and input */
+    }
+
+    #metronome-controls label[for="metronome-bpm-input"] { /* Style BPM Label */
+        font-size: 0.8em; /* Smaller label */
+        color: var(--text-secondary);
+        /* margin-right: 0; */ /* Remove right margin */
+        /* margin-bottom: 2px; */ /* Add space below */
+        display: none; /* Hide label for slim look */
+    }
+    #metronome-bpm-input {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border-color);
+        color: var(--input-text-color);
+        border-radius: 4px;
+        padding: 4px 6px;
+        width: 45px; /* Narrower input */
+        font-size: 0.9em;
+        text-align: center;
+        outline: none;
+    }
+     #metronome-bpm-input:focus {
+         box-shadow: 0 0 8px var(--input-focus-shadow);
+         border-color: var(--border-accent-1);
+      }
+    /* Hide spinner buttons on number input */
+    #metronome-bpm-input::-webkit-outer-spin-button,
+    #metronome-bpm-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    #metronome-bpm-input[type=number] {
+      -moz-appearance: textfield; /* Firefox */
+    }
+
+    /* --- Theme Variable Overrides --- */
+    /* These override the :root defaults when the corresponding class is on the body */
+    body.theme-matrix {
+        --bg-primary: #030a03; --bg-gradient-1: #0a1f0a; --bg-gradient-2: #051005; --bg-active-1: #081408; --bg-active-2: #061006; --bg-active-end: #020502; --modal-bg: rgba(10, 30, 10, 0.9); --popup-bg: rgba(20, 50, 20, 0.6); --settings-panel-bg: rgba(5, 15, 5, 0.9);
+        --text-primary: #33ff33; --text-secondary: rgba(51, 255, 51, 0.6); --text-secondary-hover: rgba(51, 255, 51, 0.9); --text-accent-1: #66ff66; --text-accent-2: #99ff99; --text-contrast: #030a03; --popup-text-color: #030a03;
+        --glow-accent-1-strong: rgba(51, 255, 51, 0.7); --glow-accent-1-medium: rgba(51, 255, 51, 0.5); --glow-accent-2-strong: rgba(102, 255, 102, 0.8); --glow-accent-2-medium: rgba(102, 255, 102, 0.6); --glow-accent-2-soft: rgba(102, 255, 102, 0.3); --glow-accent-3-medium: rgba(153, 255, 153, 0.4);
+        --border-primary: rgba(51, 255, 51, 0.3); --border-primary-hover: rgba(51, 255, 51, 0.5); --border-secondary: rgba(51, 255, 51, 0.2); --border-secondary-hover: rgba(51, 255, 51, 0.4); --border-accent-1: rgba(102, 255, 102, 0.8); --border-accent-1-dim: rgba(102, 255, 102, 0.4); --border-accent-2: rgba(153, 255, 153, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
+        --button-primary-bg: rgba(20, 80, 20, 0.6); --button-primary-bg-hover: rgba(30, 120, 30, 0.8); --button-secondary-bg: rgba(20, 80, 20, 0.4); --button-secondary-bg-hover: rgba(30, 120, 30, 0.6); --button-manage-bg: rgba(20, 80, 20, 0.5); --button-manage-bg-hover: rgba(30, 120, 30, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(51, 200, 51, 0.5); --button-special-bg-hover: rgba(51, 220, 51, 0.7); --button-confirm-bg: #44dd44; --button-confirm-bg-hover: var(--text-accent-1);
+        --input-bg: rgba(51, 255, 51, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
+        --scanline-bright: rgba(51, 255, 51, 0.08); --scanline-dim: rgba(51, 255, 51, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(0, 15, 0, 0.7); --box-shadow-button: 0 2px 5px rgba(0,30,0,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(0,40,0,0.5);
+    }
+     body.theme-danger {
+        --bg-primary: #200000; --bg-gradient-1: #5a3a3a; --bg-gradient-2: #3a1a1a; --bg-active-1: #2a1010; --bg-active-2: #200a0a; --bg-active-end: #150505; --modal-bg: rgba(40, 10, 10, 0.9); --popup-bg: rgba(255, 50, 50, 0.5); --settings-panel-bg: rgba(30, 5, 5, 0.9);
+        --text-primary: #ffd0d0; --text-secondary: rgba(255, 200, 200, 0.6); --text-secondary-hover: rgba(255, 220, 220, 0.9); --text-accent-1: #ff6666; --text-accent-2: #ff9999; --text-contrast: #1a0000; --popup-text-color: #ffeeee;
+        --glow-accent-1-strong: rgba(255, 50, 50, 0.7); --glow-accent-1-medium: rgba(255, 80, 80, 0.5); --glow-accent-2-strong: rgba(255, 100, 100, 0.8); --glow-accent-2-medium: rgba(255, 120, 120, 0.6); --glow-accent-2-soft: rgba(255, 150, 150, 0.3); --glow-accent-3-medium: rgba(255, 180, 180, 0.4);
+        --border-primary: rgba(255, 150, 150, 0.3); --border-primary-hover: rgba(255, 180, 180, 0.5); --border-secondary: rgba(255, 120, 120, 0.2); --border-secondary-hover: rgba(255, 150, 150, 0.4); --border-accent-1: rgba(255, 100, 100, 0.8); --border-accent-1-dim: rgba(255, 100, 100, 0.4); --border-accent-2: rgba(255, 150, 150, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
+        --button-primary-bg: rgba(120, 40, 40, 0.6); --button-primary-bg-hover: rgba(160, 60, 60, 0.8); --button-secondary-bg: rgba(120, 40, 40, 0.4); --button-secondary-bg-hover: rgba(160, 60, 60, 0.6); --button-manage-bg: rgba(120, 40, 40, 0.5); --button-manage-bg-hover: rgba(160, 60, 60, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(255, 60, 60, 0.5); --button-special-bg-hover: rgba(255, 80, 80, 0.7); --button-confirm-bg: #ff8888; --button-confirm-bg-hover: var(--text-accent-1);
+        --input-bg: rgba(255, 100, 100, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
+        --scanline-bright: rgba(255, 100, 100, 0.08); --scanline-dim: rgba(255, 100, 100, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(30, 0, 0, 0.7); --box-shadow-button: 0 2px 5px rgba(40,0,0,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(50,0,0,0.5);
+    }
+     body.theme-arctic {
+        --bg-primary: #050a1a; --bg-gradient-1: #2a3a5a; --bg-gradient-2: #1a2a4a; --bg-active-1: #101a30; --bg-active-2: #0a152a; --bg-active-end: #030510; --modal-bg: rgba(10, 20, 40, 0.9); --popup-bg: rgba(200, 220, 255, 0.5); --settings-panel-bg: rgba(5, 10, 30, 0.9);
+        --text-primary: #e0f0ff; --text-secondary: rgba(200, 220, 255, 0.6); --text-secondary-hover: rgba(220, 240, 255, 0.9); --text-accent-1: #a0d0ff; --text-accent-2: #c0e0ff; --text-contrast: #050a1a; --popup-text-color: #050a1a;
+        --glow-accent-1-strong: rgba(100, 180, 255, 0.7); --glow-accent-1-medium: rgba(120, 200, 255, 0.5); --glow-accent-2-strong: rgba(150, 210, 255, 0.8); --glow-accent-2-medium: rgba(180, 220, 255, 0.6); --glow-accent-2-soft: rgba(200, 230, 255, 0.3); --glow-accent-3-medium: rgba(220, 240, 255, 0.4);
+        --border-primary: rgba(180, 220, 255, 0.3); --border-primary-hover: rgba(200, 230, 255, 0.5); --border-secondary: rgba(150, 210, 255, 0.2); --border-secondary-hover: rgba(180, 220, 255, 0.4); --border-accent-1: rgba(150, 210, 255, 0.8); --border-accent-1-dim: rgba(150, 210, 255, 0.4); --border-accent-2: rgba(200, 230, 255, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
+        --button-primary-bg: rgba(40, 60, 120, 0.6); --button-primary-bg-hover: rgba(60, 80, 160, 0.8); --button-secondary-bg: rgba(40, 60, 120, 0.4); --button-secondary-bg-hover: rgba(60, 80, 160, 0.6); --button-manage-bg: rgba(40, 60, 120, 0.5); --button-manage-bg-hover: rgba(60, 80, 160, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(100, 180, 255, 0.5); --button-special-bg-hover: rgba(120, 200, 255, 0.7); --button-confirm-bg: #add8e6; --button-confirm-bg-hover: var(--text-accent-1);
+        --input-bg: rgba(150, 210, 255, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
+        --scanline-bright: rgba(200, 230, 255, 0.08); --scanline-dim: rgba(200, 230, 255, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(0, 5, 30, 0.7); --box-shadow-button: 0 2px 5px rgba(0,10,30,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(0,15,40,0.5);
+    }
 
   </style>
 </head>
@@ -569,6 +778,23 @@
     <span></span>
     <span></span>
   </button>
+
+  <div id="metronome-container">
+      <button id="metronome-toggle-collapse-btn" title="Toggle Metronome Controls">
+          <span class="icon">&#9835;</span> </button>
+      <div id="metronome-controls">
+          <button id="metronome-toggle-btn" title="Start/Stop Metronome">&#9658;</button>
+           <div class="bpm-group">
+               <input type="number" id="metronome-bpm-input" value="60" min="10" max="480" step="1" title="Beats Per Minute">
+           </div>
+          <div id="metronome-wave-selector">
+              <button class="wave-btn" data-wave="square" title="Square Wave">&#9634;</button>
+              <button class="wave-btn" data-wave="triangle" title="Triangle Wave">&#9651;</button>
+          </div>
+      </div>
+  </div>
+
+
   <div id="settings-panel">
       <button id="close-settings-btn" title="Close Settings">&times;</button>
       <h2>Settings</h2>
@@ -657,6 +883,21 @@
             rateBase: 40, // ms per line
             rateVariation: 20 // ms +/-
         },
+        metronome: { // Metronome Config
+            defaultBpm: 60,
+            minBpm: 10, // Updated
+            maxBpm: 480, // Updated
+            defaultWave: 'square', // Changed default
+            note: 'A3', // Lower pitch
+            duration: '16n',
+            volume: -15, // Quieter
+            envelope: { // Softer envelope
+                attack: 0.005,
+                decay: 0.1,
+                sustain: 0.01,
+                release: 0.2
+            }
+        },
         ui: {
             defaultTheme: 'pastel'
         },
@@ -700,59 +941,37 @@
     const themeSettingsDiv = document.getElementById('theme-settings');
     const confirmWordInput = document.getElementById('confirm-word-input');
     const praiseTermInput = document.getElementById('praise-term-input');
+    // Metronome elements
+    const metronomeContainer = document.getElementById('metronome-container'); // Outer container
+    const metronomeToggleCollapseBtn = document.getElementById('metronome-toggle-collapse-btn'); // Collapse button
+    const metronomeControls = document.getElementById('metronome-controls'); // Inner controls container
+    const metronomeToggleBtn = document.getElementById('metronome-toggle-btn'); // Play/Stop button
+    const metronomeWaveSelector = document.getElementById('metronome-wave-selector');
+    const metronomeBpmInput = document.getElementById('metronome-bpm-input');
+
 
     // --- Theme Definitions ---
+    // NOTE: The 'vars' object is kept for reference but is NOT used by applyTheme.
+    // Theme application relies on CSS classes on the body tag.
     const themes = {
         'pastel': {
             name: 'Pastel',
-            vars: { // Pastel variables
-                '--bg-primary': '#1a001a', '--bg-gradient-1': '#4a5c6a', '--bg-gradient-2': '#2e3a42', '--bg-active-1': '#2a1a20', '--bg-active-2': '#251a2a', '--bg-active-end': '#1a0a10', '--modal-bg': 'rgba(40, 20, 30, 0.9)', '--popup-bg': 'rgba(255, 223, 211, 0.5)', '--settings-panel-bg': 'rgba(30, 10, 20, 0.9)',
-                '--text-primary': '#c2f0ff', '--text-secondary': 'rgba(194, 240, 255, 0.6)', '--text-secondary-hover': 'rgba(194, 240, 255, 0.9)', '--text-accent-1': '#FFD8E1', '--text-accent-2': '#E0BBE4', '--text-contrast': '#1a001a', '--popup-text-color': '#1a0a10',
-                '--glow-accent-1-strong': 'rgba(255, 105, 180, 0.7)', '--glow-accent-1-medium': 'rgba(255, 105, 180, 0.5)', '--glow-accent-2-strong': 'rgba(255, 182, 193, 0.8)', '--glow-accent-2-medium': 'rgba(255, 182, 193, 0.6)', '--glow-accent-2-soft': 'rgba(255, 182, 193, 0.3)', '--glow-accent-3-medium': 'rgba(224, 187, 228, 0.4)',
-                '--border-primary': 'rgba(255, 255, 255, 0.3)', '--border-primary-hover': 'rgba(255, 255, 255, 0.5)', '--border-secondary': 'rgba(255, 255, 255, 0.2)', '--border-secondary-hover': 'rgba(255, 255, 255, 0.4)', '--border-accent-1': 'rgba(255, 182, 193, 0.8)', '--border-accent-1-dim': 'rgba(255, 182, 193, 0.4)', '--border-accent-2': 'rgba(224, 187, 228, 0.7)', '--modal-border-color': 'var(--border-accent-1)', '--popup-border-color': 'var(--border-accent-2)', '--settings-panel-border': 'var(--border-accent-1)',
-                '--button-primary-bg': 'rgba(100, 100, 120, 0.6)', '--button-primary-bg-hover': 'rgba(140, 140, 160, 0.8)', '--button-secondary-bg': 'rgba(100, 100, 120, 0.4)', '--button-secondary-bg-hover': 'rgba(140, 140, 160, 0.6)', '--button-manage-bg': 'rgba(100, 100, 120, 0.5)', '--button-manage-bg-hover': 'rgba(140, 140, 160, 0.7)', '--button-cat-selected-bg': 'var(--text-accent-1)', '--button-special-bg': 'rgba(255, 105, 180, 0.5)', '--button-special-bg-hover': 'rgba(255, 105, 180, 0.7)', '--button-confirm-bg': '#dcb3ff', '--button-confirm-bg-hover': 'var(--text-accent-1)',
-                '--input-bg': 'rgba(255, 255, 255, 0.1)', '--input-text-color': 'var(--text-accent-1)', '--input-border-color': 'var(--border-accent-1-dim)', '--input-focus-shadow': 'var(--glow-accent-2-medium)',
-                '--scanline-bright': 'rgba(255, 255, 255, 0.06)', '--scanline-dim': 'rgba(255, 255, 255, 0.03)', '--vignette-shadow': 'inset 0 0 150px 30px rgba(0, 0, 0, 0.7)', '--box-shadow-button': '0 2px 5px rgba(0,0,0,0.3)', '--box-shadow-button-confirm': '0 3px 7px rgba(0,0,0,0.4)'
-            },
+            vars: { /* ... Pastel vars ... */ },
             accentColors: ['#FFC0CB', '#FFB6C1', '#FF69B4', '#FF1493', '#DB7093', '#C71585', '#FFAODF', '#FFDAE9']
         },
         'matrix': {
             name: 'Matrix',
-            vars: { // Matrix variables
-                '--bg-primary': '#030a03', '--bg-gradient-1': '#0a1f0a', '--bg-gradient-2': '#051005', '--bg-active-1': '#081408', '--bg-active-2': '#061006', '--bg-active-end': '#020502', '--modal-bg': 'rgba(10, 30, 10, 0.9)', '--popup-bg': 'rgba(20, 50, 20, 0.6)', '--settings-panel-bg': 'rgba(5, 15, 5, 0.9)',
-                '--text-primary': '#33ff33', '--text-secondary': 'rgba(51, 255, 51, 0.6)', '--text-secondary-hover': 'rgba(51, 255, 51, 0.9)', '--text-accent-1': '#66ff66', '--text-accent-2': '#99ff99', '--text-contrast': '#030a03', '--popup-text-color': '#030a03',
-                '--glow-accent-1-strong': 'rgba(51, 255, 51, 0.7)', '--glow-accent-1-medium': 'rgba(51, 255, 51, 0.5)', '--glow-accent-2-strong': 'rgba(102, 255, 102, 0.8)', '--glow-accent-2-medium': 'rgba(102, 255, 102, 0.6)', '--glow-accent-2-soft': 'rgba(102, 255, 102, 0.3)', '--glow-accent-3-medium': 'rgba(153, 255, 153, 0.4)',
-                '--border-primary': 'rgba(51, 255, 51, 0.3)', '--border-primary-hover': 'rgba(51, 255, 51, 0.5)', '--border-secondary': 'rgba(51, 255, 51, 0.2)', '--border-secondary-hover': 'rgba(51, 255, 51, 0.4)', '--border-accent-1': 'rgba(102, 255, 102, 0.8)', '--border-accent-1-dim': 'rgba(102, 255, 102, 0.4)', '--border-accent-2': 'rgba(153, 255, 153, 0.7)', '--modal-border-color': 'var(--border-accent-1)', '--popup-border-color': 'var(--border-accent-2)', '--settings-panel-border': 'var(--border-accent-1)',
-                '--button-primary-bg': 'rgba(20, 80, 20, 0.6)', '--button-primary-bg-hover': 'rgba(30, 120, 30, 0.8)', '--button-secondary-bg': 'rgba(20, 80, 20, 0.4)', '--button-secondary-bg-hover': 'rgba(30, 120, 30, 0.6)', '--button-manage-bg': 'rgba(20, 80, 20, 0.5)', '--button-manage-bg-hover': 'rgba(30, 120, 30, 0.7)', '--button-cat-selected-bg': 'var(--text-accent-1)', '--button-special-bg': 'rgba(51, 200, 51, 0.5)', '--button-special-bg-hover': 'rgba(51, 220, 51, 0.7)', '--button-confirm-bg': '#44dd44', '--button-confirm-bg-hover': 'var(--text-accent-1)',
-                '--input-bg': 'rgba(51, 255, 51, 0.1)', '--input-text-color': 'var(--text-accent-1)', '--input-border-color': 'var(--border-accent-1-dim)', '--input-focus-shadow': 'var(--glow-accent-2-medium)',
-                '--scanline-bright': 'rgba(51, 255, 51, 0.08)', '--scanline-dim': 'rgba(51, 255, 51, 0.04)', '--vignette-shadow': 'inset 0 0 150px 30px rgba(0, 15, 0, 0.7)', '--box-shadow-button': '0 2px 5px rgba(0,30,0,0.4)', '--box-shadow-button-confirm': '0 3px 7px rgba(0,40,0,0.5)'
-            },
+            vars: { /* ... Matrix vars ... */ },
             accentColors: ['#33ff33', '#66ff66', '#99ff99', '#00cc00', '#228B22', '#00FF7F']
         },
-        'danger': { // NEW THEME
+        'danger': {
             name: 'Danger',
-            vars: {
-                '--bg-primary': '#1a0000', '--bg-gradient-1': '#5a3a3a', '--bg-gradient-2': '#3a1a1a', '--bg-active-1': '#2a1010', '--bg-active-2': '#200a0a', '--bg-active-end': '#150505', '--modal-bg': 'rgba(40, 10, 10, 0.9)', '--popup-bg': 'rgba(255, 200, 200, 0.5)', '--settings-panel-bg': 'rgba(30, 5, 5, 0.9)',
-                '--text-primary': '#ffd0d0', '--text-secondary': 'rgba(255, 200, 200, 0.6)', '--text-secondary-hover': 'rgba(255, 220, 220, 0.9)', '--text-accent-1': '#ff6666', '--text-accent-2': '#ff9999', '--text-contrast': '#1a0000', '--popup-text-color': '#1a0000',
-                '--glow-accent-1-strong': 'rgba(255, 50, 50, 0.7)', '--glow-accent-1-medium': 'rgba(255, 80, 80, 0.5)', '--glow-accent-2-strong': 'rgba(255, 100, 100, 0.8)', '--glow-accent-2-medium': 'rgba(255, 120, 120, 0.6)', '--glow-accent-2-soft': 'rgba(255, 150, 150, 0.3)', '--glow-accent-3-medium': 'rgba(255, 180, 180, 0.4)',
-                '--border-primary': 'rgba(255, 150, 150, 0.3)', '--border-primary-hover': 'rgba(255, 180, 180, 0.5)', '--border-secondary': 'rgba(255, 120, 120, 0.2)', '--border-secondary-hover': 'rgba(255, 150, 150, 0.4)', '--border-accent-1': 'rgba(255, 100, 100, 0.8)', '--border-accent-1-dim': 'rgba(255, 100, 100, 0.4)', '--border-accent-2': 'rgba(255, 150, 150, 0.7)', '--modal-border-color': 'var(--border-accent-1)', '--popup-border-color': 'var(--border-accent-2)', '--settings-panel-border': 'var(--border-accent-1)',
-                '--button-primary-bg': 'rgba(120, 40, 40, 0.6)', '--button-primary-bg-hover': 'rgba(160, 60, 60, 0.8)', '--button-secondary-bg': 'rgba(120, 40, 40, 0.4)', '--button-secondary-bg-hover': 'rgba(160, 60, 60, 0.6)', '--button-manage-bg': 'rgba(120, 40, 40, 0.5)', '--button-manage-bg-hover': 'rgba(160, 60, 60, 0.7)', '--button-cat-selected-bg': 'var(--text-accent-1)', '--button-special-bg': 'rgba(255, 60, 60, 0.5)', '--button-special-bg-hover': 'rgba(255, 80, 80, 0.7)', '--button-confirm-bg': '#ff8888', '--button-confirm-bg-hover': 'var(--text-accent-1)',
-                '--input-bg': 'rgba(255, 100, 100, 0.1)', '--input-text-color': 'var(--text-accent-1)', '--input-border-color': 'var(--border-accent-1-dim)', '--input-focus-shadow': 'var(--glow-accent-2-medium)',
-                '--scanline-bright': 'rgba(255, 100, 100, 0.08)', '--scanline-dim': 'rgba(255, 100, 100, 0.04)', '--vignette-shadow': 'inset 0 0 150px 30px rgba(30, 0, 0, 0.7)', '--box-shadow-button': '0 2px 5px rgba(40,0,0,0.4)', '--box-shadow-button-confirm': '0 3px 7px rgba(50,0,0,0.5)'
-            },
+            vars: { /* ... Danger vars ... */ },
             accentColors: ['#ff4444', '#ff6666', '#ff8888', '#dc143c', '#b22222', '#ff0000', '#ffaaaa']
         },
-        'arctic': { // NEW THEME
+        'arctic': {
             name: 'Arctic',
-            vars: {
-                '--bg-primary': '#050a1a', '--bg-gradient-1': '#2a3a5a', '--bg-gradient-2': '#1a2a4a', '--bg-active-1': '#101a30', '--bg-active-2': '#0a152a', '--bg-active-end': '#030510', '--modal-bg': 'rgba(10, 20, 40, 0.9)', '--popup-bg': 'rgba(200, 220, 255, 0.5)', '--settings-panel-bg': 'rgba(5, 10, 30, 0.9)',
-                '--text-primary': '#e0f0ff', '--text-secondary': 'rgba(200, 220, 255, 0.6)', '--text-secondary-hover': 'rgba(220, 240, 255, 0.9)', '--text-accent-1': '#a0d0ff', '--text-accent-2': '#c0e0ff', '--text-contrast': '#050a1a', '--popup-text-color': '#050a1a',
-                '--glow-accent-1-strong': 'rgba(100, 180, 255, 0.7)', '--glow-accent-1-medium': 'rgba(120, 200, 255, 0.5)', '--glow-accent-2-strong': 'rgba(150, 210, 255, 0.8)', '--glow-accent-2-medium': 'rgba(180, 220, 255, 0.6)', '--glow-accent-2-soft': 'rgba(200, 230, 255, 0.3)', '--glow-accent-3-medium': 'rgba(220, 240, 255, 0.4)',
-                '--border-primary': 'rgba(180, 220, 255, 0.3)', '--border-primary-hover': 'rgba(200, 230, 255, 0.5)', '--border-secondary': 'rgba(150, 210, 255, 0.2)', '--border-secondary-hover': 'rgba(180, 220, 255, 0.4)', '--border-accent-1': 'rgba(150, 210, 255, 0.8)', '--border-accent-1-dim': 'rgba(150, 210, 255, 0.4)', '--border-accent-2': 'rgba(200, 230, 255, 0.7)', '--modal-border-color': 'var(--border-accent-1)', '--popup-border-color': 'var(--border-accent-2)', '--settings-panel-border': 'var(--border-accent-1)',
-                '--button-primary-bg': 'rgba(40, 60, 120, 0.6)', '--button-primary-bg-hover': 'rgba(60, 80, 160, 0.8)', '--button-secondary-bg': 'rgba(40, 60, 120, 0.4)', '--button-secondary-bg-hover': 'rgba(60, 80, 160, 0.6)', '--button-manage-bg': 'rgba(40, 60, 120, 0.5)', '--button-manage-bg-hover': 'rgba(60, 80, 160, 0.7)', '--button-cat-selected-bg': 'var(--text-accent-1)', '--button-special-bg': 'rgba(100, 180, 255, 0.5)', '--button-special-bg-hover': 'rgba(120, 200, 255, 0.7)', '--button-confirm-bg': '#add8e6', '--button-confirm-bg-hover': 'var(--text-accent-1)',
-                '--input-bg': 'rgba(150, 210, 255, 0.1)', '--input-text-color': 'var(--text-accent-1)', '--input-border-color': 'var(--border-accent-1-dim)', '--input-focus-shadow': 'var(--glow-accent-2-medium)',
-                '--scanline-bright': 'rgba(200, 230, 255, 0.08)', '--scanline-dim': 'rgba(200, 230, 255, 0.04)', '--vignette-shadow': 'inset 0 0 150px 30px rgba(0, 5, 30, 0.7)', '--box-shadow-button': '0 2px 5px rgba(0,10,30,0.4)', '--box-shadow-button-confirm': '0 3px 7px rgba(0,15,40,0.5)'
-            },
+            vars: { /* ... Arctic vars ... */ },
             accentColors: ['#00ffff', '#7fffd4', '#afeeee', '#40e0d0', '#20b2aa', '#00ced1', '#add8e6']
         }
     };
@@ -789,6 +1008,13 @@
     // Customization State
     let currentConfirmWord = config.defaults.confirmWord;
     let currentPraiseTerm = config.defaults.praiseTerm;
+    // Metronome State
+    let metronomeBpm = config.metronome.defaultBpm;
+    let metronomeWaveType = config.metronome.defaultWave;
+    let isMetronomeRunning = false;
+    let metronomeLoopId = null;
+    let metronomeSynth = null; // Initialize later
+    let toneStarted = false; // Flag to ensure Tone.start() is called once
 
     const cuteSymbols = ['<3', ':3', '^_^', '(^-^*)', '(⌒‿⌒)', '(ﾉ´ヮ´)ﾉ*:･ﾟ✧', '~', '*', '+', '♡', '☆', '✧', '✶', '^^', '>:)', 'o.o', 'xoxo'];
 
@@ -904,7 +1130,7 @@
                  console.warn(`DEBUG: Category "${category}" not found as a key in phraseCategories object.`); // Log if key lookup fails
              }
         });
-        console.log("DEBUG: Finished populateFilteredPhrases. Final length:", currentFilteredPhrases.length); // Final log
+        // console.log("DEBUG: Finished populateFilteredPhrases. Final length:", currentFilteredPhrases.length); // Final log
      }
 
     /** Updates selectedCategories array and Start button state */
@@ -948,10 +1174,10 @@
         // Check *after* updating phrases
         if (currentFilteredPhrases.length === 0) {
              showPopup("Please select at least one training category!", 2000);
-             console.error("DEBUG: Start prevented - currentFilteredPhrases is empty after populateFilteredPhrases call."); // Added error log
+             // console.error("DEBUG: Start prevented - currentFilteredPhrases is empty after populateFilteredPhrases call."); // Error log
              return;
         }
-        isTrainingActive = true; isTrainingFinished = false; initialTrainingTime = trainingTime; fakeTimeRemaining = initialTrainingTime; fakeTimerSwitchTime = initialTrainingTime * config.timers.fakeSwitchRatio; timeElapsed = 0; intervalCounter = 0; if (loadingScreen) loadingScreen.style.display = 'none'; if (mainPanel) mainPanel.style.display = 'block'; if (title) title.classList.add('fixed'); if (fakeTimer) { fakeTimer.textContent = formatTime(fakeTimeRemaining); fakeTimer.classList.add('fixed'); fakeTimer.classList.remove('timer-jump'); } if (crtContainer) crtContainer.classList.add('training-active-bg'); disableSetupControls(true); clearLogTimeouts(); if (technoLog) technoLog.innerHTML = ''; if (centerLog) centerLog.innerHTML = ''; if (rightLog) rightLog.innerHTML = ''; timerIntervalId = setInterval(updateTrainingState, config.timers.intervalMs); /*console.log("DEBUG: Starting Log Generation...");*/ startLogGeneration(); /*console.log("DEBUG: Scheduling Popup Generation...");*/ setTimeout(startPopupGeneration, config.popups.startDelay); console.log(`Training started: ${initialTrainingTime}s, Switch time: ${fakeTimerSwitchTime}s`);
+        isTrainingActive = true; isTrainingFinished = false; initialTrainingTime = trainingTime; fakeTimeRemaining = initialTrainingTime; fakeTimerSwitchTime = initialTrainingTime * config.timers.fakeSwitchRatio; timeElapsed = 0; intervalCounter = 0; if (loadingScreen) loadingScreen.style.display = 'none'; if (mainPanel) mainPanel.style.display = 'block'; if (title) title.classList.add('fixed'); if (fakeTimer) { fakeTimer.textContent = formatTime(fakeTimeRemaining); fakeTimer.classList.add('fixed'); fakeTimer.classList.remove('timer-jump'); } if (crtContainer) crtContainer.classList.add('training-active-bg'); disableSetupControls(true); clearLogTimeouts(); if (technoLog) technoLog.innerHTML = ''; if (centerLog) centerLog.innerHTML = ''; if (rightLog) rightLog.innerHTML = ''; timerIntervalId = setInterval(updateTrainingState, config.timers.intervalMs); /*console.log("DEBUG: Starting Log Generation...");*/ startLogGeneration(); /*console.log("DEBUG: Scheduling Popup Generation...");*/ setTimeout(startPopupGeneration, config.popups.startDelay); // console.log(`Training started: ${initialTrainingTime}s, Switch time: ${fakeTimerSwitchTime}s`);
     }
     function updateTrainingState() { if (!isTrainingActive) return; trainingTime -= config.timers.intervalMs / 1000; timeElapsed += config.timers.intervalMs / 1000; intervalCounter++; updateFakeTimer(); if (trainingTime <= 0) { finishTraining(); } }
     function updateFakeTimer() { if (!isTrainingActive || !fakeTimer) return; let currentRate = (fakeTimeRemaining <= fakeTimerSwitchTime) ? config.timers.fakePhase2Rate : config.timers.fakePhase1Rate; fakeTimeRemaining -= (config.timers.intervalMs / 1000) * currentRate; let didJump = false; if (intervalCounter % config.timers.fakeJumpCheckInterval === 0 && Math.random() < config.timers.fakeJumpChance) { const jumpAmount = (Math.random() - 0.5) * config.timers.fakeJumpMagnitude; const previousFakeTime = fakeTimeRemaining; fakeTimeRemaining += jumpAmount; const minFloor = fakeTimerSwitchTime * config.timers.fakeMinFloorRatio; if (fakeTimeRemaining < minFloor && jumpAmount < 0) { fakeTimeRemaining = minFloor; } fakeTimeRemaining = Math.min(fakeTimeRemaining, initialTrainingTime); /*console.log(`DEBUG: Timer Jump Triggered! Amount: ${jumpAmount.toFixed(1)}s (from ${previousFakeTime.toFixed(1)}s to ${fakeTimeRemaining.toFixed(1)}s)`);*/ didJump = true; } fakeTimeRemaining = Math.max(0, fakeTimeRemaining); fakeTimer.textContent = formatTime(fakeTimeRemaining); if (didJump) { fakeTimer.classList.add('timer-jump'); setTimeout(() => { if (fakeTimer) fakeTimer.classList.remove('timer-jump'); }, 300); } /*if (intervalCounter % 10 === 0) { console.log(`DEBUG: Fake Timer Update: Remaining=${fakeTimeRemaining.toFixed(1)}, Rate=${currentRate.toFixed(1)}, Real Time Left=${trainingTime.toFixed(1)}`); }*/ }
@@ -960,57 +1186,87 @@
     function finishTraining() { console.log("Training Finished! Triggering praise flood..."); isTrainingActive = false; isTrainingFinished = true; if (timerIntervalId) clearInterval(timerIntervalId); if (popupIntervalId) clearTimeout(popupIntervalId); clearTimeout(logGenerationTimeoutId); timerIntervalId = null; popupIntervalId = null; logGenerationTimeoutId = null; if (title) title.classList.add('flash'); if (fakeTimer) fakeTimer.textContent = "00:00"; setTimeout(() => { clearLogTimeouts(); }, config.logs.typeSpeedMax * 2); triggerPraiseFlood(); }
     function handleConfirmationSubmit() { if (!confirmationInput || !confirmationPopup) return; const enteredText = confirmationInput.value.trim(); /*console.log(`DEBUG: Checking confirmation: Entered='${enteredText}', Required='${currentConfirmWord}' (case-insensitive)`);*/ if (enteredText.toLowerCase() === currentConfirmWord.toLowerCase()) { confirmationPopup.style.display = 'none'; resetApplication(); } else { showPopup("Incorrect. Try again.", 1500); confirmationInput.value = ''; confirmationInput.focus(); confirmationPopup.classList.add('shake'); setTimeout(() => { if (confirmationPopup) confirmationPopup.classList.remove('shake'); }, 500); } }
     function triggerPraiseFlood() { /*console.log(`DEBUG: Starting praise flood using term: '${currentPraiseTerm}'`);*/ let linesRemaining = config.flood.totalLines; const praiseTemplates = [ `Good ${currentPraiseTerm}.`, `Such a ${currentPraiseTerm} <3`, `Perfectly obedient.`, `${currentPraiseTerm}~`, `So good for me.`, `${currentPraiseTerm} ^_^` ]; let floodIntervalId = null; function floodStep() { if (linesRemaining <= 0) { if(floodIntervalId) clearInterval(floodIntervalId); console.log("DEBUG: Praise flood finished. Showing confirmation popup."); if (confirmationPopup) { confirmationPopup.style.display = 'flex'; if (confirmationInput) confirmationInput.focus(); } return; } const message = getRandomElement(praiseTemplates) + " " + randomCuteSymbol(); const targetRoll = Math.random(); if (Math.random() < 0.3) { showPopup(message, config.popups.duration * 0.8); } let targetPanel = technoLog; if (targetRoll < 0.33) targetPanel = technoLog; else if (targetRoll < 0.66) targetPanel = centerLog; else targetPanel = rightLog; if (targetPanel && currentAccentColors && currentAccentColors.length > 0) { const logEntry = document.createElement('div'); logEntry.textContent = message; const randomColor = getRandomElement(currentAccentColors); logEntry.style.color = randomColor; logEntry.style.fontWeight = 'bold'; logEntry.style.textShadow = `0 0 5px ${randomColor}`; targetPanel.appendChild(logEntry); while (targetPanel.children.length > config.logs.maxLines + 10) { targetPanel.removeChild(targetPanel.firstChild); } smoothScrollToBottom(targetPanel); } linesRemaining--; } const floodDelay = config.flood.rateBase + (Math.random() - 0.5) * config.flood.rateVariation; floodIntervalId = setInterval(floodStep, Math.max(20, floodDelay)); }
-    function resetApplication() { /*console.log("DEBUG: Resetting application...");*/ trainingTime = 0; initialTrainingTime = 0; trainingEndTime = 0; fakeTimeRemaining = 0; fakeTimerSwitchTime = 0; timeElapsed = 0; isTrainingActive = false; isTrainingFinished = false; intervalCounter = 0; if (timerIntervalId) clearInterval(timerIntervalId); if (popupIntervalId) clearTimeout(popupIntervalId); clearTimeout(logGenerationTimeoutId); clearLogTimeouts(); timerIntervalId = null; popupIntervalId = null; logGenerationTimeoutId = null; if (loadingScreen) loadingScreen.style.display = 'flex'; if (mainPanel) mainPanel.style.display = 'none'; if (title) { title.classList.remove('fixed', 'flash'); title.textContent = "TRAINING ROUTINE";} if (fakeTimer) { fakeTimer.classList.remove('fixed', 'timer-jump'); fakeTimer.textContent = "00:00"; } if (crtContainer) crtContainer.classList.remove('training-active-bg'); if (confirmationPopup) { confirmationPopup.style.display = 'none'; confirmationPopup.classList.remove('shake'); } if (confirmationInput) confirmationInput.value = ''; if (technoLog) technoLog.innerHTML = ''; if (centerLog) centerLog.innerHTML = ''; if (rightLog) rightLog.innerHTML = ''; disableSetupControls(false); updateTimerDisplay(); populateCategorySelection(); /*console.log("DEBUG: Application reset complete.");*/ }
+    function resetApplication() {
+        /*console.log("DEBUG: Resetting application...");*/
+        trainingTime = 0;
+        initialTrainingTime = 0;
+        trainingEndTime = 0;
+        fakeTimeRemaining = 0;
+        fakeTimerSwitchTime = 0;
+        timeElapsed = 0;
+        isTrainingActive = false;
+        isTrainingFinished = false;
+        intervalCounter = 0;
+        // Clear intervals and timeouts
+        if (timerIntervalId) clearInterval(timerIntervalId);
+        if (popupIntervalId) clearTimeout(popupIntervalId);
+        if (logGenerationTimeoutId) clearTimeout(logGenerationTimeoutId);
+        clearLogTimeouts();
+        stopMetronome(); // <<< Stop metronome on reset
+        timerIntervalId = null;
+        popupIntervalId = null;
+        logGenerationTimeoutId = null;
+        // Reset UI elements
+        if (loadingScreen) loadingScreen.style.display = 'flex';
+        if (mainPanel) mainPanel.style.display = 'none';
+        if (title) { title.classList.remove('fixed', 'flash'); title.textContent = "TRAINING ROUTINE";}
+        if (fakeTimer) { fakeTimer.classList.remove('fixed', 'timer-jump'); fakeTimer.textContent = "00:00"; }
+        if (crtContainer) crtContainer.classList.remove('training-active-bg');
+        if (confirmationPopup) { confirmationPopup.style.display = 'none'; confirmationPopup.classList.remove('shake'); }
+        if (confirmationInput) confirmationInput.value = '';
+        // Clear logs
+        if (technoLog) technoLog.innerHTML = '';
+        if (centerLog) centerLog.innerHTML = '';
+        if (rightLog) rightLog.innerHTML = '';
+        // Re-enable controls and update displays
+        disableSetupControls(false);
+        updateTimerDisplay();
+        populateCategorySelection(); // Resets categories based on saved state or defaults
+        /*console.log("DEBUG: Application reset complete.");*/
+     }
     function disableSetupControls(disable) { const buttonsToDisable = [ min1Btn, min10Btn, hour1Btn, extendBtn, startBtn, selectAllBtn, deselectAllBtn, ...(categorySelectionDiv ? Array.from(categorySelectionDiv.querySelectorAll('.category-button')) : []) ]; buttonsToDisable.forEach(btn => { if (btn) { btn.disabled = disable; } }); if (startBtn && !disable) { startBtn.disabled = selectedCategories.length === 0 || trainingTime <= 0; } }
     // --- End Training Control Functions ---
 
     // --- Settings Menu and Theme Functions ---
 
     /**
-     * Applies the selected theme by setting CSS variables on the :root element.
+     * Applies the selected theme by adding/removing CSS classes from the body.
      * Updates the `currentAccentColors` array and saves the theme choice.
      * @param {string} themeName - The key of the theme in the `themes` object.
      */
     function applyTheme(themeName) {
         const theme = themes[themeName];
-        if (!theme || !theme.vars) { // Check theme and vars exist
-            console.warn(`Theme "${themeName}" or its vars not found. Applying default.`);
+        if (!theme) {
+            console.warn(`Theme "${themeName}" not found. Applying default.`);
             applyTheme(config.ui.defaultTheme);
             return;
         }
 
-        // console.log(`DEBUG: Applying theme vars for: ${theme.name}`); // DEBUG
-        const root = document.documentElement; // Target :root
+        // console.log(`DEBUG: Applying theme class for: ${themeName}`); // DEBUG
+        const targetElement = document.body;
 
-        // Set all variables from the theme on :root
-        for (const [variable, value] of Object.entries(theme.vars)) {
-            try {
-                root.style.setProperty(variable, value);
-            } catch (e) {
-                 console.error(`Error setting CSS variable ${variable}:`, e);
+        // Remove existing theme classes
+        Object.keys(themes).forEach(key => {
+            // Check if the key corresponds to a theme that should have a class
+            // (i.e., not the default theme as defined in config)
+            if (key !== config.ui.defaultTheme) {
+                targetElement.classList.remove(`theme-${key}`);
             }
+        });
+         // Optionally remove default theme class if it exists (safer)
+         targetElement.classList.remove(`theme-${config.ui.defaultTheme}`);
+
+
+        // Add new theme class if not default
+        if (themeName !== config.ui.defaultTheme) {
+            targetElement.classList.add(`theme-${themeName}`);
+             // console.log(`DEBUG: Added class 'theme-${themeName}' to body.`); // DEBUG
+        } else {
+             // console.log(`DEBUG: Applied default theme (${config.ui.defaultTheme}), no class added.`); // DEBUG
         }
-        // console.log(`DEBUG: Finished setting ${Object.keys(theme.vars).length} variables for ${themeName}.`); // DEBUG
 
 
-        // Check if a key variable was actually set after a brief delay
-        // This helps confirm if the setProperty calls are having an effect
-        setTimeout(() => {
-            try {
-                const appliedBg = getComputedStyle(root).getPropertyValue('--bg-primary').trim();
-                const expectedBg = theme.vars['--bg-primary'];
-                // console.log(`DEBUG: Checked --bg-primary after applyTheme. Expected: ${expectedBg}, Actual: ${appliedBg}`); // DEBUG
-                if (!appliedBg || (expectedBg && appliedBg.toLowerCase() !== expectedBg.toLowerCase())) {
-                     // Note: This comparison might fail due to color format differences (e.g., hex vs rgb)
-                     // Check the console - if 'Actual' matches the color for the theme you clicked (even if format differs), it's likely working.
-                     // console.warn("DEBUG: --bg-primary might not have been set correctly or format differs!"); // DEBUG
-                }
-            } catch (e) {
-                 console.error("Error checking computed style:", e);
-            }
-        }, 0);
-
-        // Update accent colors
+        // Update accent colors (still needed for dynamic text coloring)
         currentAccentColors = theme.accentColors || themes[config.ui.defaultTheme].accentColors;
         // console.log("DEBUG: Updated currentAccentColors:", currentAccentColors); // DEBUG
 
@@ -1109,6 +1365,110 @@
         }
     }
 
+    // --- Metronome Logic --- NEW ---
+    /** Initializes the metronome synth */
+    function initializeMetronomeSynth() {
+        if (!metronomeSynth) {
+            metronomeSynth = new Tone.Synth({
+                oscillator: { type: metronomeWaveType },
+                envelope: config.metronome.envelope, // Use envelope from config
+                volume: config.metronome.volume // Set volume from config
+            }).toDestination();
+        }
+    }
+
+    /** Starts the metronome */
+    async function startMetronome() {
+        if (isMetronomeRunning) return;
+
+        // Ensure Tone.js audio context is started by user interaction
+        if (!toneStarted) {
+            try {
+                await Tone.start();
+                toneStarted = true;
+                console.log("AudioContext started");
+            } catch (e) {
+                console.error("Error starting AudioContext:", e);
+                // Optionally show a message to the user that audio couldn't start
+                return; // Prevent starting metronome if audio context fails
+            }
+        }
+
+        initializeMetronomeSynth(); // Ensure synth exists
+
+        // Set the transport BPM
+        Tone.Transport.bpm.value = metronomeBpm;
+
+        // Schedule the repeating event
+        metronomeLoopId = Tone.Transport.scheduleRepeat(time => {
+            // Trigger the synth sound slightly ahead of the beat for better timing perception
+            metronomeSynth.triggerAttackRelease(config.metronome.note, config.metronome.duration, time);
+        }, "4n"); // "4n" means every quarter note
+
+        // Start the transport
+        Tone.Transport.start();
+        isMetronomeRunning = true;
+        if (metronomeToggleBtn) metronomeToggleBtn.innerHTML = "&#9632;"; // Stop icon
+        // console.log(`Metronome started at ${metronomeBpm} BPM`);
+    }
+
+    /** Stops the metronome */
+    function stopMetronome() {
+        if (!isMetronomeRunning || metronomeLoopId === null) return;
+
+        Tone.Transport.stop(); // Stop the transport
+        Tone.Transport.clear(metronomeLoopId); // Clear the scheduled event
+        metronomeLoopId = null;
+        isMetronomeRunning = false;
+        if (metronomeToggleBtn) metronomeToggleBtn.innerHTML = "&#9658;"; // Play icon
+        // console.log("Metronome stopped");
+    }
+
+    /** Handles BPM changes */
+    function handleBpmChange(event) {
+        const newBpm = parseInt(event.target.value, 10);
+        // Use config values for validation
+        if (isNaN(newBpm) || newBpm < config.metronome.minBpm || newBpm > config.metronome.maxBpm) {
+            event.target.value = metronomeBpm; // Reset to current valid BPM
+            return;
+        }
+        metronomeBpm = newBpm;
+        Tone.Transport.bpm.value = metronomeBpm; // Update transport BPM directly
+        // console.log(`Metronome BPM updated to: ${metronomeBpm}`);
+    }
+
+    /** Handles Waveform changes */
+    function handleWaveChange(event) {
+        const button = event.target.closest('.wave-btn');
+        if (!button || button.classList.contains('selected')) return;
+
+        const newWave = button.dataset.wave;
+        // Only allow square and triangle
+        if (!newWave || !['square', 'triangle'].includes(newWave)) return;
+
+        metronomeWaveType = newWave;
+        if (metronomeSynth) {
+            metronomeSynth.oscillator.type = metronomeWaveType; // Update synth oscillator
+        }
+
+        // Update button visual state
+        const buttons = metronomeWaveSelector.querySelectorAll('.wave-btn');
+        buttons.forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        // console.log(`Metronome wave updated to: ${metronomeWaveType}`);
+    }
+
+    /** Toggles the metronome controls visibility */
+    function toggleMetronomeCollapse() {
+        if (metronomeContainer && metronomeToggleCollapseBtn) {
+            metronomeContainer.classList.toggle('open');
+            // Optional: Add visual indicator to button itself
+            // metronomeToggleCollapseBtn.classList.toggle('open-indicator', metronomeContainer.classList.contains('open'));
+        }
+    }
+
+    // --- End Metronome Logic ---
+
     // --- Event Listeners ---
     // Add event listeners to buttons if they exist
     if (min1Btn) min1Btn.addEventListener('click', () => { trainingTime += 60; updateTimerDisplay(); updateSelectedCategories(); }); // Update button state on time change
@@ -1154,12 +1514,40 @@
         });
     }
 
+    // Metronome Listeners --- NEW ---
+    if (metronomeToggleCollapseBtn) { // Listener for the new collapse button
+        metronomeToggleCollapseBtn.addEventListener('click', toggleMetronomeCollapse);
+    }
+    if (metronomeToggleBtn) { // Listener for Play/Stop
+        metronomeToggleBtn.addEventListener('click', () => {
+            if (isMetronomeRunning) {
+                stopMetronome();
+            } else {
+                startMetronome(); // Will call Tone.start() if needed
+            }
+        });
+    }
+    if (metronomeBpmInput) {
+        metronomeBpmInput.addEventListener('change', handleBpmChange); // Use change event to avoid rapid updates while typing
+        metronomeBpmInput.addEventListener('input', (e) => { // Optional: Live update while typing, but use Transport.bpm
+            const liveBpm = parseInt(e.target.value, 10);
+             if (!isNaN(liveBpm) && liveBpm >= config.metronome.minBpm && liveBpm <= config.metronome.maxBpm) {
+                metronomeBpm = liveBpm; // Update state
+                Tone.Transport.bpm.value = metronomeBpm; // Update Tone.js transport
+             }
+        });
+    }
+     if (metronomeWaveSelector) {
+         metronomeWaveSelector.addEventListener('click', handleWaveChange);
+     }
+    // --- End Metronome Listeners ---
+
     // --- Initialization ---
     // Runs after the DOM is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
         // console.log("DEBUG: DOM Loaded. Initializing..."); // DEBUG
         // Final check for essential elements needed for initialization
-        if (!categorySelectionDiv || !timer || !startBtn || !themeSettingsDiv || !settingsPanel || !settingsBtn || !confirmWordInput || !praiseTermInput) { // Added checks
+        if (!categorySelectionDiv || !timer || !startBtn || !themeSettingsDiv || !settingsPanel || !settingsBtn || !confirmWordInput || !praiseTermInput || !metronomeContainer || !metronomeToggleCollapseBtn || !metronomeControls || !metronomeToggleBtn || !metronomeBpmInput || !metronomeWaveSelector) { // Added checks for metronome elements
             console.error("Initialization failed: Missing essential elements for setup.");
             return;
         }
@@ -1188,16 +1576,35 @@
         // Update start button state explicitly after initial load
         updateSelectedCategories();
 
+        // Initialize Metronome UI
+        metronomeBpmInput.value = config.metronome.defaultBpm;
+        metronomeBpm = config.metronome.defaultBpm; // Sync state
+        metronomeWaveType = config.metronome.defaultWave; // Sync state
+        // Set initial wave button selection
+        const waveButtons = metronomeWaveSelector.querySelectorAll('.wave-btn');
+        waveButtons.forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.wave === metronomeWaveType);
+        });
 
-        // Add listener to close settings panel when clicking outside
+
+        // Add listener to close settings panel AND metronome panel when clicking outside
         document.addEventListener('click', (event) => {
-            // Check if the settings panel exists, is open, the click target is not the panel or inside it,
-            // and the click target is not the settings button or inside it.
-            // Use closest() to handle clicks on elements inside the button/panel.
+            // Close Settings Panel
             if (settingsPanel && settingsPanel.classList.contains('open') &&
                 !event.target.closest('#settings-panel') &&
                 !event.target.closest('#settings-btn')) {
                 closeSettingsPanel();
+            }
+            // Close Metronome Panel
+            if (metronomeContainer && metronomeContainer.classList.contains('open') &&
+                !event.target.closest('#metronome-container') // Click wasn't inside container
+                // No need to check the collapse button itself, clicking it handles the toggle
+                ) {
+                 metronomeContainer.classList.remove('open');
+                 // Also remove the open indicator from the button if needed
+                 if(metronomeToggleCollapseBtn) {
+                     metronomeToggleCollapseBtn.classList.remove('open-indicator'); // Remove indicator if using one
+                 }
             }
         });
 
