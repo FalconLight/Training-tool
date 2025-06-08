@@ -6,8 +6,7 @@
   <title>Training Console</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
   <style>
-    /* --- CSS Variables --- */
-    /* Defaults (Pastel Theme) defined in :root */
+    /* --- CSS Variables and Theme Overrides --- */
     :root {
       /* Backgrounds */
       --bg-primary: #1a001a;
@@ -76,7 +75,35 @@
       --box-shadow-button-confirm: 0 3px 7px rgba(0,0,0,0.4);
     }
 
-    /* Basic reset and font settings */
+    body.theme-matrix {
+        --bg-primary: #030a03; --bg-gradient-1: #0a1f0a; --bg-gradient-2: #051005; --bg-active-1: #081408; --bg-active-2: #061006; --bg-active-end: #020502; --modal-bg: rgba(10, 30, 10, 0.9); --popup-bg: rgba(20, 50, 20, 0.6); --settings-panel-bg: rgba(5, 15, 5, 0.9);
+        --text-primary: #33ff33; --text-secondary: rgba(51, 255, 51, 0.6); --text-secondary-hover: rgba(51, 255, 51, 0.9); --text-accent-1: #66ff66; --text-accent-2: #99ff99; --text-contrast: #030a03; --popup-text-color: #030a03;
+        --glow-accent-1-strong: rgba(51, 255, 51, 0.7); --glow-accent-1-medium: rgba(51, 255, 51, 0.5); --glow-accent-2-strong: rgba(102, 255, 102, 0.8); --glow-accent-2-medium: rgba(102, 255, 102, 0.6); --glow-accent-2-soft: rgba(102, 255, 102, 0.3); --glow-accent-3-medium: rgba(153, 255, 153, 0.4);
+        --border-primary: rgba(51, 255, 51, 0.3); --border-primary-hover: rgba(51, 255, 51, 0.5); --border-secondary: rgba(51, 255, 51, 0.2); --border-secondary-hover: rgba(51, 255, 51, 0.4); --border-accent-1: rgba(102, 255, 102, 0.8); --border-accent-1-dim: rgba(102, 255, 102, 0.4); --border-accent-2: rgba(153, 255, 153, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
+        --button-primary-bg: rgba(20, 80, 20, 0.6); --button-primary-bg-hover: rgba(30, 120, 30, 0.8); --button-secondary-bg: rgba(20, 80, 20, 0.4); --button-secondary-bg-hover: rgba(30, 120, 30, 0.6); --button-manage-bg: rgba(20, 80, 20, 0.5); --button-manage-bg-hover: rgba(30, 120, 30, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(51, 200, 51, 0.5); --button-special-bg-hover: rgba(51, 220, 51, 0.7); --button-confirm-bg: #44dd44; --button-confirm-bg-hover: var(--text-accent-1);
+        --input-bg: rgba(51, 255, 51, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
+        --scanline-bright: rgba(51, 255, 51, 0.08); --scanline-dim: rgba(51, 255, 51, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(0, 15, 0, 0.7); --box-shadow-button: 0 2px 5px rgba(0,30,0,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(0,40,0,0.5);
+    }
+     body.theme-danger {
+        --bg-primary: #200000; --bg-gradient-1: #5a3a3a; --bg-gradient-2: #3a1a1a; --bg-active-1: #2a1010; --bg-active-2: #200a0a; --bg-active-end: #150505; --modal-bg: rgba(40, 10, 10, 0.9); --popup-bg: rgba(255, 50, 50, 0.5); --settings-panel-bg: rgba(30, 5, 5, 0.9);
+        --text-primary: #ffd0d0; --text-secondary: rgba(255, 200, 200, 0.6); --text-secondary-hover: rgba(255, 220, 220, 0.9); --text-accent-1: #ff6666; --text-accent-2: #ff9999; --text-contrast: #1a0000; --popup-text-color: #ffeeee;
+        --glow-accent-1-strong: rgba(255, 50, 50, 0.7); --glow-accent-1-medium: rgba(255, 80, 80, 0.5); --glow-accent-2-strong: rgba(255, 100, 100, 0.8); --glow-accent-2-medium: rgba(255, 120, 120, 0.6); --glow-accent-2-soft: rgba(255, 150, 150, 0.3); --glow-accent-3-medium: rgba(255, 180, 180, 0.4);
+        --border-primary: rgba(255, 150, 150, 0.3); --border-primary-hover: rgba(255, 180, 180, 0.5); --border-secondary: rgba(255, 120, 120, 0.2); --border-secondary-hover: rgba(255, 150, 150, 0.4); --border-accent-1: rgba(255, 100, 100, 0.8); --border-accent-1-dim: rgba(255, 100, 100, 0.4); --border-accent-2: rgba(255, 150, 150, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
+        --button-primary-bg: rgba(120, 40, 40, 0.6); --button-primary-bg-hover: rgba(160, 60, 60, 0.8); --button-secondary-bg: rgba(120, 40, 40, 0.4); --button-secondary-bg-hover: rgba(160, 60, 60, 0.6); --button-manage-bg: rgba(120, 40, 40, 0.5); --button-manage-bg-hover: rgba(160, 60, 60, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(255, 60, 60, 0.5); --button-special-bg-hover: rgba(255, 80, 80, 0.7); --button-confirm-bg: #ff8888; --button-confirm-bg-hover: var(--text-accent-1);
+        --input-bg: rgba(255, 100, 100, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
+        --scanline-bright: rgba(255, 100, 100, 0.08); --scanline-dim: rgba(255, 100, 100, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(30, 0, 0, 0.7); --box-shadow-button: 0 2px 5px rgba(40,0,0,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(50,0,0,0.5);
+    }
+     body.theme-arctic {
+        --bg-primary: #050a1a; --bg-gradient-1: #2a3a5a; --bg-gradient-2: #1a2a4a; --bg-active-1: #101a30; --bg-active-2: #0a152a; --bg-active-end: #030510; --modal-bg: rgba(10, 20, 40, 0.9); --popup-bg: rgba(200, 220, 255, 0.5); --settings-panel-bg: rgba(5, 10, 30, 0.9);
+        --text-primary: #e0f0ff; --text-secondary: rgba(200, 220, 255, 0.6); --text-secondary-hover: rgba(220, 240, 255, 0.9); --text-accent-1: #a0d0ff; --text-accent-2: #c0e0ff; --text-contrast: #050a1a; --popup-text-color: #050a1a;
+        --glow-accent-1-strong: rgba(100, 180, 255, 0.7); --glow-accent-1-medium: rgba(120, 200, 255, 0.5); --glow-accent-2-strong: rgba(150, 210, 255, 0.8); --glow-accent-2-medium: rgba(180, 220, 255, 0.6); --glow-accent-2-soft: rgba(200, 230, 255, 0.3); --glow-accent-3-medium: rgba(220, 240, 255, 0.4);
+        --border-primary: rgba(180, 220, 255, 0.3); --border-primary-hover: rgba(200, 230, 255, 0.5); --border-secondary: rgba(150, 210, 255, 0.2); --border-secondary-hover: rgba(180, 220, 255, 0.4); --border-accent-1: rgba(150, 210, 255, 0.8); --border-accent-1-dim: rgba(150, 210, 255, 0.4); --border-accent-2: rgba(200, 230, 255, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
+        --button-primary-bg: rgba(40, 60, 120, 0.6); --button-primary-bg-hover: rgba(60, 80, 160, 0.8); --button-secondary-bg: rgba(40, 60, 120, 0.4); --button-secondary-bg-hover: rgba(60, 80, 160, 0.6); --button-manage-bg: rgba(40, 60, 120, 0.5); --button-manage-bg-hover: rgba(60, 80, 160, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(100, 180, 255, 0.5); --button-special-bg-hover: rgba(120, 200, 255, 0.7); --button-confirm-bg: #add8e6; --button-confirm-bg-hover: var(--text-accent-1);
+        --input-bg: rgba(150, 210, 255, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
+        --scanline-bright: rgba(200, 230, 255, 0.08); --scanline-dim: rgba(200, 230, 255, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(0, 5, 30, 0.7); --box-shadow-button: 0 2px 5px rgba(0,10,30,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(0,15,40,0.5);
+    }
+
+    /* --- General Reset and Layout --- */
     * {
       margin: 0;
       padding: 0;
@@ -141,6 +168,7 @@
       0% { opacity: 0.98; } 50% { opacity: 1; } 100% { opacity: 0.97; }
     }
 
+    /* --- UI Components: Title, Loading, Timer, Main Panel, Logs --- */
     /* Title styling */
     #title {
       position: absolute; top: 10%; left: 50%; width: 90%;
@@ -377,10 +405,6 @@
          #metronome-container {
              /* Allow it to shrink naturally */
              max-width: none;
-         }
-         #metronome-controls label {
-             /* Keep label hidden */
-             /* display: none; */ /* Re-enable label if needed */
          }
          #metronome-bpm-input {
              width: 45px; /* Narrower input */
@@ -708,13 +732,6 @@
         gap: 4px; /* Space between label (if shown) and input */
     }
 
-    #metronome-controls label[for="metronome-bpm-input"] { /* Style BPM Label */
-        font-size: 0.8em; /* Smaller label */
-        color: var(--text-secondary);
-        /* margin-right: 0; */ /* Remove right margin */
-        /* margin-bottom: 2px; */ /* Add space below */
-        display: none; /* Hide label for slim look */
-    }
     #metronome-bpm-input {
         background: var(--input-bg);
         border: 1px solid var(--input-border-color);
@@ -737,48 +754,51 @@
       margin: 0;
     }
     #metronome-bpm-input[type=number] {
+      appearance: textfield;
       -moz-appearance: textfield; /* Firefox */
     }
 
-    /* --- Theme Variable Overrides --- */
-    /* These override the :root defaults when the corresponding class is on the body */
-    body.theme-matrix {
-        --bg-primary: #030a03; --bg-gradient-1: #0a1f0a; --bg-gradient-2: #051005; --bg-active-1: #081408; --bg-active-2: #061006; --bg-active-end: #020502; --modal-bg: rgba(10, 30, 10, 0.9); --popup-bg: rgba(20, 50, 20, 0.6); --settings-panel-bg: rgba(5, 15, 5, 0.9);
-        --text-primary: #33ff33; --text-secondary: rgba(51, 255, 51, 0.6); --text-secondary-hover: rgba(51, 255, 51, 0.9); --text-accent-1: #66ff66; --text-accent-2: #99ff99; --text-contrast: #030a03; --popup-text-color: #030a03;
-        --glow-accent-1-strong: rgba(51, 255, 51, 0.7); --glow-accent-1-medium: rgba(51, 255, 51, 0.5); --glow-accent-2-strong: rgba(102, 255, 102, 0.8); --glow-accent-2-medium: rgba(102, 255, 102, 0.6); --glow-accent-2-soft: rgba(102, 255, 102, 0.3); --glow-accent-3-medium: rgba(153, 255, 153, 0.4);
-        --border-primary: rgba(51, 255, 51, 0.3); --border-primary-hover: rgba(51, 255, 51, 0.5); --border-secondary: rgba(51, 255, 51, 0.2); --border-secondary-hover: rgba(51, 255, 51, 0.4); --border-accent-1: rgba(102, 255, 102, 0.8); --border-accent-1-dim: rgba(102, 255, 102, 0.4); --border-accent-2: rgba(153, 255, 153, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
-        --button-primary-bg: rgba(20, 80, 20, 0.6); --button-primary-bg-hover: rgba(30, 120, 30, 0.8); --button-secondary-bg: rgba(20, 80, 20, 0.4); --button-secondary-bg-hover: rgba(30, 120, 30, 0.6); --button-manage-bg: rgba(20, 80, 20, 0.5); --button-manage-bg-hover: rgba(30, 120, 30, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(51, 200, 51, 0.5); --button-special-bg-hover: rgba(51, 220, 51, 0.7); --button-confirm-bg: #44dd44; --button-confirm-bg-hover: var(--text-accent-1);
-        --input-bg: rgba(51, 255, 51, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
-        --scanline-bright: rgba(51, 255, 51, 0.08); --scanline-dim: rgba(51, 255, 51, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(0, 15, 0, 0.7); --box-shadow-button: 0 2px 5px rgba(0,30,0,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(0,40,0,0.5);
-    }
-     body.theme-danger {
-        --bg-primary: #200000; --bg-gradient-1: #5a3a3a; --bg-gradient-2: #3a1a1a; --bg-active-1: #2a1010; --bg-active-2: #200a0a; --bg-active-end: #150505; --modal-bg: rgba(40, 10, 10, 0.9); --popup-bg: rgba(255, 50, 50, 0.5); --settings-panel-bg: rgba(30, 5, 5, 0.9);
-        --text-primary: #ffd0d0; --text-secondary: rgba(255, 200, 200, 0.6); --text-secondary-hover: rgba(255, 220, 220, 0.9); --text-accent-1: #ff6666; --text-accent-2: #ff9999; --text-contrast: #1a0000; --popup-text-color: #ffeeee;
-        --glow-accent-1-strong: rgba(255, 50, 50, 0.7); --glow-accent-1-medium: rgba(255, 80, 80, 0.5); --glow-accent-2-strong: rgba(255, 100, 100, 0.8); --glow-accent-2-medium: rgba(255, 120, 120, 0.6); --glow-accent-2-soft: rgba(255, 150, 150, 0.3); --glow-accent-3-medium: rgba(255, 180, 180, 0.4);
-        --border-primary: rgba(255, 150, 150, 0.3); --border-primary-hover: rgba(255, 180, 180, 0.5); --border-secondary: rgba(255, 120, 120, 0.2); --border-secondary-hover: rgba(255, 150, 150, 0.4); --border-accent-1: rgba(255, 100, 100, 0.8); --border-accent-1-dim: rgba(255, 100, 100, 0.4); --border-accent-2: rgba(255, 150, 150, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
-        --button-primary-bg: rgba(120, 40, 40, 0.6); --button-primary-bg-hover: rgba(160, 60, 60, 0.8); --button-secondary-bg: rgba(120, 40, 40, 0.4); --button-secondary-bg-hover: rgba(160, 60, 60, 0.6); --button-manage-bg: rgba(120, 40, 40, 0.5); --button-manage-bg-hover: rgba(160, 60, 60, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(255, 60, 60, 0.5); --button-special-bg-hover: rgba(255, 80, 80, 0.7); --button-confirm-bg: #ff8888; --button-confirm-bg-hover: var(--text-accent-1);
-        --input-bg: rgba(255, 100, 100, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
-        --scanline-bright: rgba(255, 100, 100, 0.08); --scanline-dim: rgba(255, 100, 100, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(30, 0, 0, 0.7); --box-shadow-button: 0 2px 5px rgba(40,0,0,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(50,0,0,0.5);
-    }
-     body.theme-arctic {
-        --bg-primary: #050a1a; --bg-gradient-1: #2a3a5a; --bg-gradient-2: #1a2a4a; --bg-active-1: #101a30; --bg-active-2: #0a152a; --bg-active-end: #030510; --modal-bg: rgba(10, 20, 40, 0.9); --popup-bg: rgba(200, 220, 255, 0.5); --settings-panel-bg: rgba(5, 10, 30, 0.9);
-        --text-primary: #e0f0ff; --text-secondary: rgba(200, 220, 255, 0.6); --text-secondary-hover: rgba(220, 240, 255, 0.9); --text-accent-1: #a0d0ff; --text-accent-2: #c0e0ff; --text-contrast: #050a1a; --popup-text-color: #050a1a;
-        --glow-accent-1-strong: rgba(100, 180, 255, 0.7); --glow-accent-1-medium: rgba(120, 200, 255, 0.5); --glow-accent-2-strong: rgba(150, 210, 255, 0.8); --glow-accent-2-medium: rgba(180, 220, 255, 0.6); --glow-accent-2-soft: rgba(200, 230, 255, 0.3); --glow-accent-3-medium: rgba(220, 240, 255, 0.4);
-        --border-primary: rgba(180, 220, 255, 0.3); --border-primary-hover: rgba(200, 230, 255, 0.5); --border-secondary: rgba(150, 210, 255, 0.2); --border-secondary-hover: rgba(180, 220, 255, 0.4); --border-accent-1: rgba(150, 210, 255, 0.8); --border-accent-1-dim: rgba(150, 210, 255, 0.4); --border-accent-2: rgba(200, 230, 255, 0.7); --modal-border-color: var(--border-accent-1); --popup-border-color: var(--border-accent-2); --settings-panel-border: var(--border-accent-1);
-        --button-primary-bg: rgba(40, 60, 120, 0.6); --button-primary-bg-hover: rgba(60, 80, 160, 0.8); --button-secondary-bg: rgba(40, 60, 120, 0.4); --button-secondary-bg-hover: rgba(60, 80, 160, 0.6); --button-manage-bg: rgba(40, 60, 120, 0.5); --button-manage-bg-hover: rgba(60, 80, 160, 0.7); --button-cat-selected-bg: var(--text-accent-1); --button-special-bg: rgba(100, 180, 255, 0.5); --button-special-bg-hover: rgba(120, 200, 255, 0.7); --button-confirm-bg: #add8e6; --button-confirm-bg-hover: var(--text-accent-1);
-        --input-bg: rgba(150, 210, 255, 0.1); --input-text-color: var(--text-accent-1); --input-border-color: var(--border-accent-1-dim); --input-focus-shadow: var(--glow-accent-2-medium);
-        --scanline-bright: rgba(200, 230, 255, 0.08); --scanline-dim: rgba(200, 230, 255, 0.04); --vignette-shadow: inset 0 0 150px 30px rgba(0, 5, 30, 0.7); --box-shadow-button: 0 2px 5px rgba(0,10,30,0.4); --box-shadow-button-confirm: 0 3px 7px rgba(0,15,40,0.5);
-    }
+    /* --- Responsive Design --- */
+    @media (max-width: 500px) {
+         #category-selection {
+             grid-template-columns: repeat(2, auto); /* 2 columns on smaller screens */
+             width: 90%; /* Adjust width */
+         }
+         #title {
+             font-size: 1.8em; /* Slightly smaller title */
+         }
+         #title.flash {
+              font-size: 2.5em;
+         }
+         /* Adjust settings panel for small screens */
+         #settings-panel {
+             width: 80%;
+             max-width: 280px; /* Keep max-width or adjust if needed */
+         }
+         /* Adjust metronome panel for small screens */
+         #metronome-container {
+             /* Allow it to shrink naturally */
+             max-width: none;
+         }
+         #metronome-bpm-input {
+             width: 45px; /* Narrower input */
+         }
+         #metronome-wave-selector button {
+             width: 24px;
+             padding: 3px;
+             font-size: 1em;
+         }
+     }
 
   </style>
 </head>
 <body>
+  <!-- UI BUTTONS -->
   <button id="settings-btn" title="Settings">
     <span></span>
     <span></span>
     <span></span>
   </button>
-
   <div id="metronome-container">
       <button id="metronome-toggle-collapse-btn" title="Toggle Metronome Controls">
           <span class="icon">&#9835;</span> </button>
@@ -793,7 +813,6 @@
           </div>
       </div>
   </div>
-
 
   <div id="settings-panel">
       <button id="close-settings-btn" title="Close Settings">&times;</button>
@@ -814,6 +833,7 @@
           </div>
   </div>
 
+  <!-- MAIN CONSOLE LAYOUT -->
   <div class="crt-container">
     <div id="title">TRAINING ROUTINE</div>
 
@@ -852,7 +872,9 @@
     </div>
 
   </div>
-<script>
+
+  <!-- JAVASCRIPT: All logic grouped at the end for future separation -->
+  <script>
     // --- Configuration ---
     const config = {
         timers: {
@@ -1185,7 +1207,40 @@
     function startLogGeneration() { clearTimeout(logGenerationTimeoutId); function generateLogEntry() { /*console.log("DEBUG: generateLogEntry called.");*/ if (!isTrainingActive || currentFilteredPhrases.length === 0) { /*console.log(`DEBUG: generateLogEntry stopping: isTrainingActive=${isTrainingActive}, phrases=${currentFilteredPhrases.length}`);*/ logGenerationTimeoutId = null; return; } const message = getRandomElement(currentFilteredPhrases); const targetPanelRoll = Math.random(); let targetPanel = (targetPanelRoll < 0.35) ? technoLog : (targetPanelRoll < 0.75) ? centerLog : rightLog; if (targetPanel) { typeMessageToLog(targetPanel, message); } const averageTypeTime = message.length * ((config.logs.typeSpeedMax + config.logs.typeSpeedMin) / 2); const baseDelay = Math.max(50, averageTypeTime * 0.3); const randomAddition = Math.random() * 250; const nextLogDelay = baseDelay + randomAddition; /*console.log(`DEBUG: Scheduling next log entry in ${nextLogDelay.toFixed(0)}ms`);*/ logGenerationTimeoutId = setTimeout(generateLogEntry, nextLogDelay); } logGenerationTimeoutId = setTimeout(generateLogEntry, 200); /*console.log("DEBUG: Log generation started.");*/ }
     function finishTraining() { console.log("Training Finished! Triggering praise flood..."); isTrainingActive = false; isTrainingFinished = true; if (timerIntervalId) clearInterval(timerIntervalId); if (popupIntervalId) clearTimeout(popupIntervalId); clearTimeout(logGenerationTimeoutId); timerIntervalId = null; popupIntervalId = null; logGenerationTimeoutId = null; if (title) title.classList.add('flash'); if (fakeTimer) fakeTimer.textContent = "00:00"; setTimeout(() => { clearLogTimeouts(); }, config.logs.typeSpeedMax * 2); triggerPraiseFlood(); }
     function handleConfirmationSubmit() { if (!confirmationInput || !confirmationPopup) return; const enteredText = confirmationInput.value.trim(); /*console.log(`DEBUG: Checking confirmation: Entered='${enteredText}', Required='${currentConfirmWord}' (case-insensitive)`);*/ if (enteredText.toLowerCase() === currentConfirmWord.toLowerCase()) { confirmationPopup.style.display = 'none'; resetApplication(); } else { showPopup("Incorrect. Try again.", 1500); confirmationInput.value = ''; confirmationInput.focus(); confirmationPopup.classList.add('shake'); setTimeout(() => { if (confirmationPopup) confirmationPopup.classList.remove('shake'); }, 500); } }
-    function triggerPraiseFlood() { /*console.log(`DEBUG: Starting praise flood using term: '${currentPraiseTerm}'`);*/ let linesRemaining = config.flood.totalLines; const praiseTemplates = [ `Good ${currentPraiseTerm}.`, `Such a ${currentPraiseTerm} <3`, `Perfectly obedient.`, `${currentPraiseTerm}~`, `So good for me.`, `${currentPraiseTerm} ^_^` ]; let floodIntervalId = null; function floodStep() { if (linesRemaining <= 0) { if(floodIntervalId) clearInterval(floodIntervalId); console.log("DEBUG: Praise flood finished. Showing confirmation popup."); if (confirmationPopup) { confirmationPopup.style.display = 'flex'; if (confirmationInput) confirmationInput.focus(); } return; } const message = getRandomElement(praiseTemplates) + " " + randomCuteSymbol(); const targetRoll = Math.random(); if (Math.random() < 0.3) { showPopup(message, config.popups.duration * 0.8); } let targetPanel = technoLog; if (targetRoll < 0.33) targetPanel = technoLog; else if (targetRoll < 0.66) targetPanel = centerLog; else targetPanel = rightLog; if (targetPanel && currentAccentColors && currentAccentColors.length > 0) { const logEntry = document.createElement('div'); logEntry.textContent = message; const randomColor = getRandomElement(currentAccentColors); logEntry.style.color = randomColor; logEntry.style.fontWeight = 'bold'; logEntry.style.textShadow = `0 0 5px ${randomColor}`; targetPanel.appendChild(logEntry); while (targetPanel.children.length > config.logs.maxLines + 10) { targetPanel.removeChild(targetPanel.firstChild); } smoothScrollToBottom(targetPanel); } linesRemaining--; } const floodDelay = config.flood.rateBase + (Math.random() - 0.5) * config.flood.rateVariation; floodIntervalId = setInterval(floodStep, Math.max(20, floodDelay)); }
+    function triggerPraiseFlood() {
+        let linesRemaining = config.flood.totalLines;
+        const praiseTemplates = [
+            `Good ${currentPraiseTerm}.`,
+            `Such a ${currentPraiseTerm} <3`,
+            `Perfectly obedient.`,
+            `${currentPraiseTerm}~`,
+            `So good for me.`,
+            `${currentPraiseTerm} ^_^`
+        ];
+        let floodIntervalId = null;
+        function floodStep() {
+            if (linesRemaining <= 0) {
+                if(floodIntervalId) clearInterval(floodIntervalId);
+                if (confirmationPopup) {
+                    confirmationPopup.style.display = 'flex';
+                    if (confirmationInput) confirmationInput.focus();
+                }
+                return;
+            }
+            const message = getRandomElement(praiseTemplates) + " " + randomCuteSymbol();
+            // Show popup as before
+            if (Math.random() < 0.3) {
+                showPopup(message, config.popups.duration * 0.8);
+            }
+            // Push to all three log panels at a fast rate
+            if (technoLog) typeMessageToLog(technoLog, message);
+            if (centerLog) typeMessageToLog(centerLog, message);
+            if (rightLog) typeMessageToLog(rightLog, message);
+            linesRemaining--;
+            floodIntervalId = setTimeout(floodStep, config.flood.rateBase + (Math.random() * config.flood.rateVariation));
+        }
+        floodStep();
+    }
     function resetApplication() {
         /*console.log("DEBUG: Resetting application...");*/
         trainingTime = 0;
