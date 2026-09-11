@@ -1,0 +1,1006 @@
+/* ==========================================================================
+   Training Console — Stylesheet
+   Las variables de :root son el tema "Pastel" (por defecto).
+   Los demás temas ya NO viven acá como clases body.theme-X: se aplican en
+   tiempo de ejecución desde themes.default.json (o un tema importado),
+   escribiendo estas mismas variables directo en el elemento <body>.
+   Ver script.js -> applyTheme().
+   ========================================================================== */
+
+:root {
+  /* Backgrounds */
+  --bg-primary: #1a001a;
+  --bg-gradient-1: #4a5c6a;
+  --bg-gradient-2: #2e3a42;
+  --bg-active-1: #2a1a20;
+  --bg-active-2: #251a2a;
+  --bg-active-end: #1a0a10;
+  --modal-bg: rgba(40, 20, 30, 0.9);
+  --popup-bg: rgba(255, 223, 211, 0.5);
+  --settings-panel-bg: rgba(30, 10, 20, 0.9);
+
+  /* Text */
+  --text-primary: #c2f0ff;
+  --text-secondary: rgba(194, 240, 255, 0.6);
+  --text-secondary-hover: rgba(194, 240, 255, 0.9);
+  --text-accent-1: #FFD8E1;
+  --text-accent-2: #E0BBE4;
+  --text-contrast: #1a001a;
+  --popup-text-color: #1a0a10;
+
+  /* Glows */
+  --glow-accent-1-strong: rgba(255, 105, 180, 0.7);
+  --glow-accent-1-medium: rgba(255, 105, 180, 0.5);
+  --glow-accent-2-strong: rgba(255, 182, 193, 0.8);
+  --glow-accent-2-medium: rgba(255, 182, 193, 0.6);
+  --glow-accent-2-soft: rgba(255, 182, 193, 0.3);
+  --glow-accent-3-medium: rgba(224, 187, 228, 0.4);
+
+  /* Borders */
+  --border-primary: rgba(255, 255, 255, 0.3);
+  --border-primary-hover: rgba(255, 255, 255, 0.5);
+  --border-secondary: rgba(255, 255, 255, 0.2);
+  --border-secondary-hover: rgba(255, 255, 255, 0.4);
+  --border-accent-1: rgba(255, 182, 193, 0.8);
+  --border-accent-1-dim: rgba(255, 182, 193, 0.4);
+  --border-accent-2: rgba(224, 187, 228, 0.7);
+  --modal-border-color: rgba(255, 182, 193, 0.8);
+  --popup-border-color: rgba(224, 187, 228, 0.7);
+  --settings-panel-border: rgba(255, 182, 193, 0.8);
+
+  /* Buttons */
+  --button-primary-bg: rgba(100, 100, 120, 0.6);
+  --button-primary-bg-hover: rgba(140, 140, 160, 0.8);
+  --button-secondary-bg: rgba(100, 100, 120, 0.4);
+  --button-secondary-bg-hover: rgba(140, 140, 160, 0.6);
+  --button-manage-bg: rgba(100, 100, 120, 0.5);
+  --button-manage-bg-hover: rgba(140, 140, 160, 0.7);
+  --button-cat-selected-bg: #FFD8E1;
+  --button-special-bg: rgba(255, 105, 180, 0.5);
+  --button-special-bg-hover: rgba(255, 105, 180, 0.7);
+  --button-confirm-bg: #dcb3ff;
+  --button-confirm-bg-hover: #FFD8E1;
+
+  /* Inputs */
+  --input-bg: rgba(255, 255, 255, 0.1);
+  --input-text-color: #FFD8E1;
+  --input-border-color: rgba(255, 182, 193, 0.4);
+  --input-focus-shadow: rgba(255, 182, 193, 0.6);
+
+  /* Effects */
+  --scanline-bright: rgba(255, 255, 255, 0.06);
+  --scanline-dim: rgba(255, 255, 255, 0.03);
+  --vignette-shadow: inset 0 0 150px 30px rgba(0, 0, 0, 0.7);
+  --box-shadow-button: 0 2px 5px rgba(0,0,0,0.3);
+  --box-shadow-button-confirm: 0 3px 7px rgba(0,0,0,0.4);
+}
+
+/* --- General Reset and Layout --- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Courier New', Courier, monospace;
+  user-select: none;
+}
+
+/* Los campos de texto SÍ deben poder seleccionarse/copiarse con normalidad */
+input, textarea {
+  user-select: text;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg-primary);
+  position: relative;
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.5s ease;
+}
+
+/* CRT Effect Container */
+.crt-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at center, var(--bg-gradient-1), var(--bg-gradient-2));
+    filter: contrast(1.1) brightness(1.05);
+    animation: flicker 0.15s infinite;
+}
+.crt-container.training-active-bg {
+    animation: flicker 0.15s infinite, themeShift 20s linear infinite alternate;
+}
+@keyframes themeShift {
+  0% { background: radial-gradient(circle at 70% 30%, var(--bg-active-1), var(--bg-active-end) 70%); }
+  50% { background: radial-gradient(circle at 30% 70%, var(--bg-active-2), var(--bg-active-end) 70%); }
+  100% { background: radial-gradient(circle at 70% 30%, var(--bg-active-1), var(--bg-active-end) 70%); }
+}
+.crt-container::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background-image: repeating-linear-gradient( to bottom, var(--scanline-bright) 0px, var(--scanline-dim) 1px, transparent 2px, transparent 4px );
+  pointer-events: none; z-index: 9999; opacity: 0.7;
+}
+.crt-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    box-shadow: var(--vignette-shadow);
+    pointer-events: none; z-index: 9998;
+}
+@keyframes flicker {
+  0% { opacity: 0.98; } 50% { opacity: 1; } 100% { opacity: 0.97; }
+}
+
+/* --- UI Components: Title, Loading, Timer, Main Panel, Logs --- */
+#title {
+  position: absolute; top: 10%; left: 50%; width: 90%;
+  transform: translate(-50%, -50%);
+  font-size: 2em; color: var(--text-primary); text-align: center;
+  animation: pulse 2s infinite; z-index: 5; transition: top 1s ease;
+  text-shadow: 0 0 8px var(--glow-accent-1-strong), 0 0 15px var(--glow-accent-1-medium);
+  white-space: nowrap;
+}
+#title.fixed { top: 10px; transform: translateX(-50%); animation: none; }
+#title.flash { font-size: 3em; color: var(--text-accent-1); animation: flash 0.2s infinite; white-space: nowrap; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+#loading-screen {
+  position: relative; z-index: 2; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; height: 100%; padding-top: 5%;
+  overflow-y: auto;
+}
+#time-button-group { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
+.control-button {
+  padding: 10px 20px; background: var(--button-primary-bg); border: 1px solid var(--border-primary);
+  border-radius: 4px; font-size: 1em; color: var(--text-primary); cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s, color 0.3s, border-color 0.3s;
+  box-shadow: var(--box-shadow-button);
+}
+.control-button:hover:not(:disabled) {
+    background: var(--button-primary-bg-hover);
+    box-shadow: 0 0 10px var(--glow-accent-1-medium);
+    border-color: var(--border-primary-hover);
+}
+.control-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    background: var(--button-primary-bg);
+    box-shadow: none;
+}
+#extend-btn {
+    padding: 8px 12px; font-size: 1.2em; background: var(--button-special-bg);
+    border-color: var(--border-accent-1); color: var(--text-accent-1);
+}
+#extend-btn:hover:not(:disabled) {
+    background: var(--button-special-bg-hover);
+    box-shadow: 0 0 12px var(--glow-accent-1-strong);
+}
+
+#category-management {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+.manage-button {
+    padding: 5px 10px;
+    font-size: 0.8em;
+    background: var(--button-manage-bg);
+    border: 1px solid var(--border-secondary);
+    color: var(--text-secondary);
+}
+.manage-button:hover:not(:disabled) {
+    background: var(--button-manage-bg-hover);
+    color: var(--text-secondary-hover);
+    border-color: var(--border-secondary-hover);
+}
+
+#category-selection {
+    margin-top: 5px;
+    margin-bottom: 15px;
+    display: grid; grid-template-columns: repeat(3, auto);
+    justify-content: center; gap: 8px;
+    max-width: 90%; width: 450px;
+}
+.category-button {
+    padding: 8px 15px; background: var(--button-secondary-bg); border: 1px solid var(--border-secondary);
+    border-radius: 4px; font-size: 0.9em; color: var(--text-secondary); cursor: pointer;
+    transition: background 0.3s, box-shadow 0.3s, color 0.3s, border-color 0.3s;
+    text-align: center;
+}
+.category-button:hover:not(:disabled) {
+    background: var(--button-secondary-bg-hover); border-color: var(--border-secondary-hover);
+    color: var(--text-secondary-hover);
+    box-shadow: 0 0 8px var(--glow-accent-2-soft);
+}
+.category-button.selected {
+    background: var(--button-cat-selected-bg); border-color: var(--border-accent-1);
+    color: var(--text-contrast); box-shadow: 0 0 10px var(--glow-accent-2-medium);
+    font-weight: bold;
+}
+.category-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.category-button.selected:disabled {
+    background: var(--button-cat-selected-bg);
+    border-color: var(--border-accent-1);
+    color: var(--text-contrast);
+    opacity: 0.7;
+}
+
+#start-btn {
+  margin-top: 15px;
+  padding: 12px 25px; background: var(--button-confirm-bg); border: 1px solid var(--border-primary-hover);
+  border-radius: 4px; font-size: 1.1em; cursor: pointer; color: var(--text-contrast);
+  transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
+  box-shadow: var(--box-shadow-button-confirm);
+}
+#start-btn:hover:not(:disabled) {
+    background: var(--button-confirm-bg-hover);
+    box-shadow: 0 0 15px var(--glow-accent-2-strong);
+}
+#start-btn:active:not(:disabled) { transform: scale(0.98); }
+#timer-container { margin-top: 15px; min-height: 25px; display: flex; justify-content: center; align-items: center; width: 300px; }
+#timer { font-size: 1.2em; color: var(--text-primary); visibility: hidden; min-height: 1.5em; }
+
+#main-panel {
+  display: none; width: 100%; height: 100%; color: white; padding: 10px;
+  padding-top: 60px;
+  overflow: hidden; position: absolute; top: 0; left: 0; z-index: 2;
+}
+.log-panel {
+    position: absolute; top: 60px; bottom: 10px; font-size: 0.9em; line-height: 1.3em;
+    overflow-y: auto; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none;
+    padding: 5px;
+    text-shadow: 0 0 6px var(--glow-accent-2-medium), 0 0 12px var(--glow-accent-3-medium);
+}
+.log-panel::-webkit-scrollbar { display: none; }
+#techno-log { left: 10px; width: 30%; }
+#center-log { left: 50%; transform: translateX(-50%); width: 35%; text-align: center; }
+#right-log { right: 10px; width: 30%; text-align: right; }
+#fake-timer {
+  position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 1.5em; color: var(--text-accent-1); text-align: center;
+  transition: top 1s ease, color 0.2s linear, text-shadow 0.2s linear;
+  z-index: 10;
+  text-shadow: 0 0 8px var(--glow-accent-1-strong), 0 0 15px var(--glow-accent-1-medium);
+  pointer-events: none;
+}
+#fake-timer.timer-jump {
+    color: var(--button-special-bg);
+    text-shadow: 0 0 10px var(--button-special-bg), 0 0 20px var(--button-special-bg);
+}
+#fake-timer.fixed { top: 40px; transform: translateX(-50%); }
+
+/* Popup message styling (frases flotantes durante la sesión) */
+.popup {
+  position: absolute; background: var(--popup-bg); padding: 8px 12px; font-size: 1.1em;
+  max-width: 300px; border: 1px solid var(--popup-border-color); border-radius: 5px;
+  overflow: hidden; color: var(--popup-text-color); backdrop-filter: blur(2px); z-index: 9998;
+  box-shadow: 0 0 15px var(--glow-accent-2-medium); animation: popupFade 0.8s ease-out forwards;
+  text-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+@keyframes popupFade { 0% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0; transform: scale(0.9); } }
+
+/* Toast de validación / feedback de UI (setup y confirmación) — separado de .popup a propósito */
+#ui-toast {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border-color);
+  color: var(--text-primary);
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 0.95em;
+  z-index: 10005;
+  box-shadow: 0 0 15px var(--glow-accent-1-medium);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  max-width: 80%;
+  text-align: center;
+}
+#ui-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+#confirmation-popup {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 350px; max-width: 90vw; padding: 30px; background: var(--modal-bg);
+    border: 1px solid var(--modal-border-color); border-radius: 8px;
+    box-shadow: 0 0 25px var(--glow-accent-1-medium); z-index: 10000; display: none;
+    flex-direction: column; align-items: center; text-align: center; backdrop-filter: blur(3px);
+}
+#confirmation-popup label {
+    font-size: 1.2em; color: var(--text-accent-1); margin-bottom: 15px;
+    text-shadow: 0 0 5px var(--glow-accent-2-medium);
+}
+#confirmation-input {
+    width: 80%; padding: 8px 10px; margin-bottom: 20px; background: var(--input-bg);
+    border: 1px solid var(--input-border-color); border-radius: 4px; color: var(--input-text-color);
+    font-size: 1.1em; text-align: center; outline: none;
+}
+#confirmation-input:focus { box-shadow: 0 0 10px var(--input-focus-shadow); }
+#confirmation-button {
+    padding: 10px 25px; background: var(--button-confirm-bg); border: 1px solid var(--border-primary-hover);
+    border-radius: 4px; font-size: 1em; cursor: pointer; color: var(--text-contrast);
+    transition: background 0.3s, transform 0.1s, box-shadow 0.3s; box-shadow: var(--box-shadow-button);
+}
+#confirmation-button:hover {
+    background: var(--button-confirm-bg-hover);
+    box-shadow: 0 0 15px var(--glow-accent-2-strong);
+}
+#confirmation-button:active { transform: scale(0.98); }
+
+@keyframes shake {
+  0%, 100% { transform: translate(-50%, -50%) translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translate(-50%, -50%) translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translate(-50%, -50%) translateX(5px); }
+}
+#confirmation-popup.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* --- Settings Menu CSS --- */
+#settings-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 10001;
+  background: var(--button-primary-bg);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  padding: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
+  box-shadow: var(--box-shadow-button);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 36px;
+  height: 34px;
+  align-items: center;
+}
+#settings-btn:hover {
+  background: var(--button-primary-bg-hover);
+  box-shadow: 0 0 10px var(--glow-accent-1-medium);
+  border-color: var(--border-primary-hover);
+}
+#settings-btn span {
+  display: block;
+  width: 70%;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 1px;
+  transition: background-color 0.3s;
+}
+#settings-btn:hover span {
+  background-color: var(--text-primary);
+}
+
+/* Botón de ayuda / tutorial, al lado del de settings */
+#help-btn {
+  position: fixed;
+  top: 15px;
+  right: 61px;
+  z-index: 10001;
+  background: var(--button-primary-bg);
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  width: 36px;
+  height: 34px;
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
+  box-shadow: var(--box-shadow-button);
+}
+#help-btn:hover {
+  background: var(--button-primary-bg-hover);
+  box-shadow: 0 0 10px var(--glow-accent-1-medium);
+  border-color: var(--border-primary-hover);
+}
+
+#settings-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100%;
+  background: var(--settings-panel-bg);
+  border-left: 2px solid var(--settings-panel-border);
+  z-index: 10002;
+  padding: 60px 20px 20px 20px;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+  transform: translateX(100%);
+  transition: transform 0.4s ease-in-out;
+  backdrop-filter: blur(5px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-accent-1) transparent;
+}
+#settings-panel.open {
+  transform: translateX(0);
+}
+#settings-panel h2 {
+  color: var(--text-accent-1);
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.4em;
+  text-shadow: 0 0 5px var(--glow-accent-1-medium);
+}
+#close-settings-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: var(--text-accent-1);
+  font-size: 1.8em;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+  transition: color 0.3s, transform 0.3s;
+}
+#close-settings-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+#theme-settings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+#theme-settings h3 {
+  grid-column: 1 / -1;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 1em;
+  color: var(--text-secondary);
+}
+.theme-button {
+  padding: 6px 10px;
+  background: var(--button-secondary-bg);
+  border: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+  font-size: 0.8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.theme-button:hover {
+  background: var(--button-secondary-bg-hover);
+  border-color: var(--border-secondary-hover);
+  color: var(--text-secondary-hover);
+  box-shadow: 0 0 8px var(--glow-accent-2-soft);
+}
+.theme-button.selected {
+  background: var(--button-confirm-bg);
+  border-color: var(--border-accent-1);
+  color: var(--text-contrast);
+  font-weight: bold;
+  box-shadow: 0 0 10px var(--glow-accent-2-medium);
+}
+
+#custom-theme-section {
+  margin-bottom: 20px;
+}
+#custom-theme-btn {
+  width: 100%;
+}
+#custom-theme-panel {
+  max-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out, margin 0.3s ease-out;
+}
+#custom-theme-panel.open {
+  max-height: 260px;
+  margin-top: 10px;
+  padding: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+}
+.custom-color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.custom-color-row label {
+  font-size: 0.85em;
+  color: var(--text-secondary-hover);
+}
+.custom-color-row input[type="color"] {
+  width: 42px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+  background: none;
+  cursor: pointer;
+}
+
+#customization-settings {
+  margin-top: 15px;
+  border-top: 1px solid var(--border-secondary);
+  padding-top: 15px;
+}
+#customization-settings h3 {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+.setting-item {
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.setting-item label {
+  font-size: 0.9em;
+  color: var(--text-secondary-hover);
+  margin-bottom: 4px;
+}
+.setting-item input[type="text"] {
+  width: 100%;
+  padding: 6px 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border-color);
+  border-radius: 4px;
+  color: var(--input-text-color);
+  font-size: 0.9em;
+  outline: none;
+}
+.setting-item input[type="text"]:focus {
+  box-shadow: 0 0 8px var(--input-focus-shadow);
+  border-color: var(--border-accent-1);
+}
+
+/* Sección de Importar / Exportar (frases y temas personalizados) */
+#data-settings {
+  margin-top: 15px;
+  border-top: 1px solid var(--border-secondary);
+  padding-top: 15px;
+}
+#data-settings h3 {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+.data-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.data-row .data-row-label {
+  font-size: 0.85em;
+  color: var(--text-secondary-hover);
+}
+.data-row .data-row-buttons {
+  display: flex;
+  gap: 6px;
+}
+.data-button {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 0.8em;
+  background: var(--button-manage-bg);
+  border: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+.data-button:hover {
+  background: var(--button-manage-bg-hover);
+  color: var(--text-secondary-hover);
+  border-color: var(--border-secondary-hover);
+}
+.data-status {
+  font-size: 0.75em;
+  color: var(--text-secondary);
+  min-height: 1.2em;
+}
+.data-status.error {
+  color: var(--text-accent-1);
+}
+#reset-data-btn {
+  width: 100%;
+  margin-top: 4px;
+}
+#reset-confirm-row {
+  display: none;
+  margin-top: 8px;
+  padding: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-accent-1-dim);
+  border-radius: 4px;
+}
+#reset-confirm-row.open {
+  display: block;
+}
+#reset-confirm-row span {
+  display: block;
+  font-size: 0.78em;
+  color: var(--text-secondary-hover);
+  margin-bottom: 8px;
+}
+.reset-confirm-buttons {
+  display: flex;
+  gap: 6px;
+}
+.reset-confirm-buttons .data-button {
+  flex: 1;
+}
+#reset-confirm-yes-btn {
+  background: var(--button-special-bg);
+  color: var(--text-contrast);
+  border-color: var(--border-accent-1);
+}
+#reset-confirm-yes-btn:hover {
+  background: var(--button-special-bg-hover);
+}
+
+#add-category-btn {
+  width: 100%;
+  margin-bottom: 12px;
+}
+#add-category-panel {
+  max-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out, margin 0.3s ease-out;
+}
+#add-category-panel.open {
+  max-height: 260px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--border-secondary);
+  border-radius: 4px;
+}
+#new-category-name,
+#new-category-phrases {
+  width: 100%;
+  padding: 6px 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border-color);
+  border-radius: 4px;
+  color: var(--input-text-color);
+  font-size: 0.85em;
+  outline: none;
+  resize: vertical;
+}
+#new-category-name:focus,
+#new-category-phrases:focus {
+  box-shadow: 0 0 8px var(--input-focus-shadow);
+  border-color: var(--border-accent-1);
+}
+
+/* --- Tutorial Modal --- */
+#tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 10010;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+#tutorial-overlay.open {
+  display: flex;
+}
+#tutorial-modal {
+  background: var(--modal-bg);
+  border: 1px solid var(--modal-border-color);
+  border-radius: 8px;
+  box-shadow: 0 0 30px var(--glow-accent-1-medium);
+  max-width: 480px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 25px;
+  color: var(--text-primary);
+  position: relative;
+  backdrop-filter: blur(4px);
+}
+#tutorial-modal h2 {
+  color: var(--text-accent-1);
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  text-shadow: 0 0 5px var(--glow-accent-1-medium);
+}
+#tutorial-modal h3 {
+  color: var(--text-accent-2);
+  margin-top: 16px;
+  margin-bottom: 6px;
+  font-size: 1em;
+}
+#tutorial-modal p, #tutorial-modal li {
+  font-size: 0.9em;
+  line-height: 1.5em;
+  color: var(--text-secondary-hover);
+  margin-bottom: 6px;
+}
+#tutorial-modal ul {
+  padding-left: 18px;
+  margin-bottom: 6px;
+}
+#tutorial-modal strong {
+  color: var(--text-primary);
+}
+#close-tutorial-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-accent-1);
+  font-size: 1.8em;
+  cursor: pointer;
+  padding: 5px;
+  line-height: 1;
+  transition: color 0.3s, transform 0.3s;
+}
+#close-tutorial-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+#tutorial-step-body {
+  min-height: 90px;
+}
+#tutorial-nav {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+#tutorial-step-indicator {
+  font-size: 0.78em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+#tutorial-nav-buttons {
+  display: flex;
+  gap: 8px;
+}
+#tutorial-nav-buttons button {
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  cursor: pointer;
+  box-shadow: var(--box-shadow-button);
+  transition: background 0.3s, box-shadow 0.3s, opacity 0.3s;
+}
+#tutorial-back-btn {
+  background: var(--button-secondary-bg);
+  border: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+}
+#tutorial-back-btn:hover:not(:disabled) {
+  background: var(--button-secondary-bg-hover);
+  color: var(--text-secondary-hover);
+}
+#tutorial-back-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+#tutorial-next-btn {
+  background: var(--button-confirm-bg);
+  border: 1px solid var(--border-primary-hover);
+  color: var(--text-contrast);
+}
+#tutorial-next-btn:hover {
+  background: var(--button-confirm-bg-hover);
+  box-shadow: 0 0 15px var(--glow-accent-2-strong);
+}
+
+/* --- Metronome Controls --- */
+#metronome-container {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    background: var(--settings-panel-bg);
+    border: 1px solid var(--settings-panel-border);
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    width: auto;
+}
+#metronome-toggle-collapse-btn {
+    background: var(--button-primary-bg);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    padding: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
+    box-shadow: var(--box-shadow-button);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 34px;
+    align-self: center;
+    margin: 4px;
+}
+#metronome-toggle-collapse-btn:hover {
+    background: var(--button-primary-bg-hover);
+    box-shadow: 0 0 10px var(--glow-accent-1-medium);
+    border-color: var(--border-primary-hover);
+    color: var(--text-primary);
+}
+#metronome-toggle-collapse-btn .icon {
+    display: inline-block;
+    font-size: 1.4em;
+    line-height: 1;
+}
+#metronome-container.open #metronome-toggle-collapse-btn {
+    background: var(--button-primary-bg-hover);
+    border-color: var(--border-primary-hover);
+}
+#metronome-controls {
+    padding: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out, border-top 0.3s ease-out;
+    width: 100%;
+}
+#metronome-container.open #metronome-controls {
+    max-height: 300px;
+    padding: 8px;
+    border-top: 1px solid var(--border-secondary);
+}
+#metronome-toggle-btn {
+    background: var(--button-primary-bg);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+    transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+    width: 35px;
+    text-align: center;
+}
+#metronome-toggle-btn:hover {
+    background: var(--button-primary-bg-hover);
+    border-color: var(--border-primary-hover);
+    box-shadow: 0 0 8px var(--glow-accent-1-medium);
+}
+#metronome-wave-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+}
+#metronome-wave-selector button {
+    background: var(--button-secondary-bg);
+    border: 1px solid var(--border-secondary);
+    color: var(--text-secondary);
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+    width: 35px;
+    text-align: center;
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+}
+#metronome-wave-selector button:hover {
+    background: var(--button-secondary-bg-hover);
+    border-color: var(--border-secondary-hover);
+    color: var(--text-secondary-hover);
+}
+#metronome-wave-selector button.selected {
+    background: var(--button-confirm-bg);
+    border-color: var(--border-accent-1);
+    color: var(--text-contrast);
+    font-weight: bold;
+}
+#metronome-controls .bpm-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    gap: 4px;
+}
+#metronome-bpm-input {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border-color);
+    color: var(--input-text-color);
+    border-radius: 4px;
+    padding: 4px 6px;
+    width: 45px;
+    font-size: 0.9em;
+    text-align: center;
+    outline: none;
+}
+#metronome-bpm-input:focus {
+    box-shadow: 0 0 8px var(--input-focus-shadow);
+    border-color: var(--border-accent-1);
+}
+#metronome-bpm-input::-webkit-outer-spin-button,
+#metronome-bpm-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+#metronome-bpm-input[type=number] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 500px) {
+     #category-selection {
+         grid-template-columns: repeat(2, auto);
+         width: 90%;
+     }
+     #title {
+         font-size: 1.8em;
+     }
+     #title.flash {
+          font-size: 2.5em;
+     }
+     #settings-panel {
+         width: 85%;
+         max-width: 280px;
+     }
+     #metronome-container {
+         max-width: none;
+     }
+     #metronome-bpm-input {
+         width: 45px;
+     }
+     #metronome-wave-selector button {
+         width: 24px;
+         padding: 3px;
+         font-size: 1em;
+     }
+     #help-btn {
+        right: 57px;
+     }
+}
